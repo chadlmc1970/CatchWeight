@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-export type ChartHeight = "compact" | "comfortable";
+export type ChartHeight = "compact" | "comfortable" | "auto";
 
 interface ChartCardProps {
   title: string;
@@ -63,7 +63,10 @@ export default function ChartCard({
   children,
   className = "",
 }: ChartCardProps) {
-  const heightClass = height === "compact" ? "h-[200px]" : "h-[300px]";
+  const heightClass =
+    height === "auto" ? "" :
+    height === "compact" ? "h-[200px]" :
+    "h-[300px]";
 
   return (
     <div className={`bg-white rounded-xl shadow-lg ${className}`}>

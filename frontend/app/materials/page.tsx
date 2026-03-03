@@ -69,6 +69,7 @@ export default function MaterialsPage() {
       {/* Materials Table */}
       <ChartCard
         title="Material Master Data"
+        height="auto"
         infoText="Master data for all materials including catch-weight items. Click a material ID to view UoM conversion definitions."
       >
         <div className="overflow-x-auto">
@@ -104,6 +105,7 @@ export default function MaterialsPage() {
       {selected && (
         <ChartCard
           title={`${selected.material_id} — UoM Conversions`}
+          height="auto"
           infoText="Unit of Measure conversion factors for dual-UoM tracking. Shows how base UoM converts to alternative units."
         >
           {selected.conversions.length === 0 ? (
