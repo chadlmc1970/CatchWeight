@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import TableCard from '@/components/TableCard';
 import RelationshipSidebar from '@/components/RelationshipSidebar';
+import S4RelationshipViewer from '@/components/S4RelationshipViewer';
 
 interface SystemStatus {
   document_count: number;
@@ -75,7 +76,7 @@ interface TablesResponse {
 }
 
 type ResetState = 'idle' | 'clearing' | 'backfilling' | 'seeding' | 'complete' | 'error';
-type AdminTab = 'controls' | 'schema' | 'layout';
+type AdminTab = 'controls' | 'schema' | 'layout' | 's4mapping';
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<AdminTab>('controls');
@@ -226,6 +227,16 @@ export default function AdminPage() {
             }`}
           >
             🔄 Controls & Audit
+          </button>
+          <button
+            onClick={() => setActiveTab('s4mapping')}
+            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              activeTab === 's4mapping'
+                ? 'bg-blue-600 text-white shadow-lg'
+                : 'bg-white text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            🔗 S4 Mapping
           </button>
           <button
             onClick={() => setActiveTab('schema')}
@@ -427,6 +438,11 @@ export default function AdminPage() {
           )}
         </div>
           </div>
+        )}
+
+        {/* S4 Mapping Tab */}
+        {activeTab === 's4mapping' && (
+          <S4RelationshipViewer />
         )}
 
         {/* Schema Viewer Tab */}
