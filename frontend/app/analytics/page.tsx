@@ -464,6 +464,9 @@ export default function DataProductsPage() {
           </div>
         </div>
       </div>
+
+      {/* AI-Powered Insights Preview */}
+      <AIInsightsPreview forecastingSummary={forecastingSummary} />
     </div>
   );
 }
@@ -514,7 +517,14 @@ function MetricCard({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
 
+// AI-Powered Insights Preview Component
+function AIInsightsPreview({ forecastingSummary }: { forecastingSummary: ForecastingSummary | null }) {
+  return (
+    <div>
       {/* AI-Powered Insights Section */}
       <div className="mt-12 pt-12 border-t-4 border-purple-200">
         <div className="flex items-center justify-between mb-6">
