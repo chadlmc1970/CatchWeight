@@ -136,6 +136,21 @@ export default function ForecastingPage() {
           <p className="text-slate-600">Predictive Analytics for Supply Chain Optimization</p>
         </div>
 
+        {/* AI Explainer Banner */}
+        <div className="bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl shadow-xl p-6 mb-8 text-white">
+          <div className="flex items-start gap-4">
+            <div className="text-4xl">🤖</div>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold mb-2">Powered by SAP Business Data Cloud + Business AI</h3>
+              <p className="text-sm text-purple-100 leading-relaxed">
+                This dashboard demonstrates how SAP Business AI can transform catch-weight data into actionable predictions.
+                Using machine learning algorithms, we analyze historical patterns to score supplier reliability (95% confidence intervals),
+                predict inventory stockouts (consumption-based forecasting), and forecast margin erosion (7-day moving average models).
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Key Insights Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-lg p-6">

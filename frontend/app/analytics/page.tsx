@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
 import { apiFetch } from '@/lib/api';
 
@@ -40,6 +41,19 @@ interface WeightDriftRecord {
   drift_lb: number;
 }
 
+interface ForecastingSummary {
+  total_suppliers: number;
+  worst_reliability_score: number;
+  best_reliability_score: number;
+  avg_reliability_score: number;
+  total_materials_tracked: number;
+  critical_alerts: number;
+  warning_alerts: number;
+  next_reorder_in_days: number | null;
+  avg_daily_erosion: number;
+  total_erosion_90days: number;
+}
+
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658', '#FF6B9D'];
 const SAP_BLUE = '#0070F3';
 const SAP_DARK_BLUE = '#0053BA';
@@ -50,6 +64,7 @@ export default function DataProductsPage() {
   const [weightDriftByMaterial, setWeightDriftByMaterial] = useState<MaterialMetric[]>([]);
   const [marginErosionByMaterial, setMarginErosionByMaterial] = useState<MaterialMetric[]>([]);
   const [weightDriftRecords, setWeightDriftRecords] = useState<WeightDriftRecord[]>([]);
+  const [forecastingSummary, setForecastingSummary] = useState<ForecastingSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -57,12 +72,13 @@ export default function DataProductsPage() {
     async function fetchData() {
       setLoading(true);
       try {
-        const [wdSummary, meSummary, wdByMat, meByMat, wdRecords] = await Promise.all([
+        const [wdSummary, meSummary, wdByMat, meByMat, wdRecords, forecastData] = await Promise.all([
           apiFetch<WeightDriftSummary>('/v1/dataproducts/weight-drift/summary'),
           apiFetch<MarginErosionSummary>('/v1/dataproducts/margin-erosion/summary'),
           apiFetch<MaterialMetric[]>('/v1/dataproducts/weight-drift/by-material'),
           apiFetch<MaterialMetric[]>('/v1/dataproducts/margin-erosion/by-material'),
           apiFetch<WeightDriftRecord[]>('/v1/dataproducts/weight-drift'),
+          apiFetch<ForecastingSummary>('/v1/forecasting/summary'),
         ]);
 
         setWeightDriftSummary(wdSummary);
@@ -70,6 +86,7 @@ export default function DataProductsPage() {
         setWeightDriftByMaterial(wdByMat);
         setMarginErosionByMaterial(meByMat);
         setWeightDriftRecords(wdRecords);
+        setForecastingSummary(forecastData);
       } catch (error) {
         console.error('Error fetching data products:', error);
       } finally {
@@ -494,6 +511,67 @@ function MetricCard({
               {trend === 'critical' && '!'}
               {trend === 'neutral' && '→'}
             </span>
+          </div>
+        </div>
+      </div>
+
+      {/* AI-Powered Insights Section */}
+      <div className="mt-12 pt-12 border-t-4 border-purple-200">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent flex items-center gap-3">
+              🤖 AI-Powered Insights
+              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-normal">
+                Business AI
+              </span>
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">Predictive analytics powered by SAP Business Data Cloud + AI</p>
+          </div>
+          <Link
+            href="/forecasting"
+            className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            View Full AI Dashboard →
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Card 1: Supplier Risk */}
+          <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl shadow-lg p-6 border border-red-200">
+            <div className="text-sm text-red-700 font-semibold mb-2">⚠️ Supplier Risk Analysis</div>
+            <div className="text-3xl font-bold text-red-600 mb-2">
+              {forecastingSummary?.worst_reliability_score?.toFixed(1) || '—'}%
+            </div>
+            <div className="text-xs text-red-600">Lowest reliability score detected</div>
+            <div className="text-xs text-gray-600 mt-3">
+              AI analyzes historical weight variance patterns to identify high-risk suppliers
+            </div>
+          </div>
+
+          {/* Card 2: Inventory Alerts */}
+          <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl shadow-lg p-6 border border-yellow-200">
+            <div className="text-sm text-yellow-700 font-semibold mb-2">🔔 Smart Reorder Alerts</div>
+            <div className="text-3xl font-bold text-yellow-600 mb-2">
+              {forecastingSummary?.critical_alerts || 0} critical
+            </div>
+            <div className="text-xs text-yellow-600">
+              Next reorder: {forecastingSummary?.next_reorder_in_days?.toFixed(0) || '?'} days
+            </div>
+            <div className="text-xs text-gray-600 mt-3">
+              Predictive alerts based on consumption patterns and stock levels
+            </div>
+          </div>
+
+          {/* Card 3: Margin Forecast */}
+          <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl shadow-lg p-6 border border-purple-200">
+            <div className="text-sm text-purple-700 font-semibold mb-2">📈 30-Day Margin Forecast</div>
+            <div className="text-3xl font-bold text-purple-600 mb-2">
+              ${forecastingSummary?.total_erosion_90days?.toFixed(0) || '—'}
+            </div>
+            <div className="text-xs text-purple-600">Predicted 90-day exposure</div>
+            <div className="text-xs text-gray-600 mt-3">
+              Time-series forecasting with confidence intervals using ML algorithms
+            </div>
           </div>
         </div>
       </div>
