@@ -67,7 +67,6 @@ export default function ForecastingPage() {
   const [marginTrend, setMarginTrend] = useState<MarginTrend | null>(null);
   const [summary, setSummary] = useState<ForecastingSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [density, setDensity] = useState<'compact' | 'comfortable'>('compact');
   const [alertFilter, setAlertFilter] = useState<'all' | 'critical'>('all');
 
   useEffect(() => {
@@ -106,7 +105,7 @@ export default function ForecastingPage() {
     );
   }
 
-  const chartHeight = density === 'compact' ? 'compact' : 'comfortable';
+  const chartHeight = 'compact';
 
   // Prepare chart data - WORST performers = lowest reliability scores (ascending sort)
   const sortedByReliability = [...supplierPerformance].sort(
@@ -136,20 +135,12 @@ export default function ForecastingPage() {
       <div className="bg-white border-b border-slate-200 p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-slate-900">✨ AI Insights & Forecasting</h1>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setDensity(density === 'compact' ? 'comfortable' : 'compact')}
-              className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-            >
-              {density === 'compact' ? '📏 Compact' : '📐 Comfortable'}
-            </button>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-            >
-              🔄 Refresh
-            </button>
-          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+          >
+            🔄 Refresh
+          </button>
         </div>
 
         {/* Compact KPIs - Horizontal Layout */}
