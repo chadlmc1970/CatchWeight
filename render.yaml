@@ -14,7 +14,7 @@ services:
       - key: DATABASE_URL
         value: postgresql://neondb_owner:npg_V2ALZjiI5qtr@ep-dark-hill-aiwdm4cf-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
       - key: PYTHON_VERSION
-        value: "3.11"
+        value: "3.11.0"
 
   # Frontend Dashboard
   - type: web
