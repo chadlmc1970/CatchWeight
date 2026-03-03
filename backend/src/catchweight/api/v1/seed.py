@@ -13,6 +13,8 @@ _SQL_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "sql"
 def load_seed_data():
     """Load sample Tyson-like data (idempotent — clears existing first)."""
     seed_path = os.path.join(_SQL_DIR, "004_seed.sql")
+    backfill_path = os.path.join(_SQL_DIR, "006_backfill_historical.sql")
+
     if not os.path.exists(seed_path):
         raise HTTPException(500, "Seed SQL file not found")
 
@@ -20,8 +22,14 @@ def load_seed_data():
         sql = f.read()
 
     with get_connection() as conn:
-        # Load seed data
+        # Load seed data (current 3 weeks)
         conn.execute(sql)
+
+        # Load historical backfill (90 days of prior data for trends)
+        if os.path.exists(backfill_path):
+            with open(backfill_path) as f:
+                backfill_sql = f.read()
+            conn.execute(backfill_sql)
 
         # Rebuild MARD and MCHB stock tables from MSEG movements
         rebuild_stock_sql = """
@@ -59,7 +67,7 @@ def load_seed_data():
         conn.execute(rebuild_stock_sql)
         conn.commit()
 
-    return {"seeded": True, "message": "Sample data loaded successfully"}
+    return {"seeded": True, "message": "Realistic data loaded (227 transactions over 90 days)"}
 
 
 @router.delete("/seed")
