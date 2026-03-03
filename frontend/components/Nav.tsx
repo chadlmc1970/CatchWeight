@@ -47,7 +47,7 @@ export default function Nav() {
   };
 
   return (
-    <nav className="bg-slate-900 text-white px-6 py-3 flex items-center gap-6">
+    <nav className="sticky top-0 z-50 bg-slate-900 text-white px-6 py-3 flex items-center gap-6 shadow-lg">
       <span className="font-bold text-lg tracking-tight mr-4">CatchWeight POC</span>
       {links.map((l) => (
         <Link
