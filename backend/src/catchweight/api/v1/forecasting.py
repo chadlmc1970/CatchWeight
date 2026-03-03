@@ -191,46 +191,46 @@ def get_forecasting_summary():
                 FROM v_forecasting_summary
             """).fetchone()
 
-        if not row:
+            if not row:
+                return {
+                    "total_suppliers": 0,
+                    "worst_reliability_score": 0,
+                    "best_reliability_score": 0,
+                    "avg_reliability": 0,
+                    "total_materials_tracked": 0,
+                    "critical_alerts": 0,
+                    "warning_alerts": 0,
+                    "next_reorder_in_days": None,
+                    "avg_daily_erosion": 0,
+                    "total_erosion_90days": 0,
+                    "high_risk_suppliers": 0,
+                    "total_exposure": 0
+                }
+
+            # Calculate high_risk_suppliers (reliability < 95%) and total_exposure
+            supplier_stats = conn.execute("""
+                SELECT
+                    COUNT(CASE WHEN reliability_score < 95 THEN 1 END) as high_risk,
+                    COALESCE(SUM(total_exposure), 0) as total_exp
+                FROM v_supplier_performance_profile
+            """).fetchone()
+
+            high_risk_suppliers = supplier_stats[0] if supplier_stats else 0
+            total_exposure = float(supplier_stats[1]) if supplier_stats else 0.0
+
             return {
-                "total_suppliers": 0,
-                "worst_reliability_score": 0,
-                "best_reliability_score": 0,
-                "avg_reliability": 0,
-                "total_materials_tracked": 0,
-                "critical_alerts": 0,
-                "warning_alerts": 0,
-                "next_reorder_in_days": None,
-                "avg_daily_erosion": 0,
-                "total_erosion_90days": 0,
-                "high_risk_suppliers": 0,
-                "total_exposure": 0
+                "total_suppliers": row[0],
+                "worst_reliability_score": float(row[1]) if row[1] else 0.0,
+                "best_reliability_score": float(row[2]) if row[2] else 0.0,
+                "avg_reliability": float(row[3]) if row[3] else 0.0,  # Changed from avg_reliability_score
+                "total_materials_tracked": row[4],
+                "critical_alerts": row[5],
+                "warning_alerts": row[6],
+                "next_reorder_in_days": float(row[7]) if row[7] else None,
+                "avg_daily_erosion": float(row[8]) if row[8] else 0.0,
+                "total_erosion_90days": float(row[9]) if row[9] else 0.0,
+                "high_risk_suppliers": high_risk_suppliers,
+                "total_exposure": total_exposure
             }
-
-        # Calculate high_risk_suppliers (reliability < 95%) and total_exposure
-        supplier_stats = conn.execute("""
-            SELECT
-                COUNT(CASE WHEN reliability_score < 95 THEN 1 END) as high_risk,
-                COALESCE(SUM(total_exposure), 0) as total_exp
-            FROM v_supplier_performance_profile
-        """).fetchone()
-
-        high_risk_suppliers = supplier_stats[0] if supplier_stats else 0
-        total_exposure = float(supplier_stats[1]) if supplier_stats else 0.0
-
-        return {
-            "total_suppliers": row[0],
-            "worst_reliability_score": float(row[1]) if row[1] else 0.0,
-            "best_reliability_score": float(row[2]) if row[2] else 0.0,
-            "avg_reliability": float(row[3]) if row[3] else 0.0,  # Changed from avg_reliability_score
-            "total_materials_tracked": row[4],
-            "critical_alerts": row[5],
-            "warning_alerts": row[6],
-            "next_reorder_in_days": float(row[7]) if row[7] else None,
-            "avg_daily_erosion": float(row[8]) if row[8] else 0.0,
-            "total_erosion_90days": float(row[9]) if row[9] else 0.0,
-            "high_risk_suppliers": high_risk_suppliers,
-            "total_exposure": total_exposure
-        }
     except Exception as e:
         raise HTTPException(500, f"Failed to retrieve forecasting summary: {e}")
