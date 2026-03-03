@@ -2,3 +2,7 @@ fastapi==0.115.6
 uvicorn==0.34.0
 psycopg[binary]==3.3.3
 pydantic==2.10.5
+anthropic==0.47.0
+pyjwt==2.9.0
+bcrypt==4.1.1
+python-multipart==0.0.6
