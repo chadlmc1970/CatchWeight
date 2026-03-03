@@ -352,7 +352,7 @@ export default function ForecastingPage() {
                 fill="#8884d8"
                 fillOpacity={0.6}
                 strokeWidth={2}
-                strokeDasharray={(entry: any) => (entry.type === 'forecast' ? '5 5' : '0')}
+                strokeDasharray="5 5"
               />
             </AreaChart>
           </ResponsiveContainer>
