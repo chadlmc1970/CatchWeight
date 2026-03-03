@@ -4,44 +4,14 @@ import { useEffect, useState } from 'react';
 import {
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend
 } from 'recharts';
 import { apiFetch } from '@/lib/api';
-
-// Info Icon Component
-function InfoIcon({ explanation }: { explanation: string }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  return (
-    <div className="inline-block relative">
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 text-xs font-bold transition-colors cursor-pointer"
-        aria-label="Information"
-      >
-        i
-      </button>
-      {isExpanded && (
-        <div className="absolute z-10 mt-2 w-80 p-4 bg-white rounded-lg shadow-xl border border-gray-200 text-sm text-gray-700 leading-relaxed">
-          <button
-            onClick={() => setIsExpanded(false)}
-            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-          >
-            ✕
-          </button>
-          <p>{explanation}</p>
-        </div>
-      )}
-    </div>
-  );
-}
+import { DashboardGrid, GridCell, ChartCard, CompactKPICard } from '@/components/dashboard';
 
 interface SupplierPerformance {
   material_id: string;
@@ -97,21 +67,23 @@ export default function ForecastingPage() {
   const [marginTrend, setMarginTrend] = useState<MarginTrend | null>(null);
   const [summary, setSummary] = useState<ForecastingSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [density, setDensity] = useState<'compact' | 'comfortable'>('compact');
+  const [alertFilter, setAlertFilter] = useState<'all' | 'critical'>('all');
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
       try {
-        const [suppliers, alerts, trend, summaryData] = await Promise.all([
+        const [suppliers, alerts, margin, summaryData] = await Promise.all([
           apiFetch<SupplierPerformance[]>('/v1/forecasting/supplier-performance'),
           apiFetch<ReorderAlert[]>('/v1/forecasting/reorder-alerts'),
-          apiFetch<MarginTrend>('/v1/forecasting/margin-trend?forecast_days=30'),
+          apiFetch<MarginTrend>('/v1/forecasting/margin-trend'),
           apiFetch<ForecastingSummary>('/v1/forecasting/summary'),
         ]);
 
         setSupplierPerformance(suppliers);
         setReorderAlerts(alerts);
-        setMarginTrend(trend);
+        setMarginTrend(margin);
         setSummary(summaryData);
       } catch (error) {
         console.error('Error fetching forecasting data:', error);
@@ -125,345 +97,280 @@ export default function ForecastingPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <div className="text-lg font-medium text-gray-700">Loading Forecasting Dashboard...</div>
+          <div className="text-lg font-medium text-gray-700">Loading AI Insights...</div>
         </div>
       </div>
     );
   }
 
-  // Find top risk and best performer
-  const sortedByReliability = [...supplierPerformance].sort((a, b) => a.reliability_score - b.reliability_score);
-  const worstSupplier = sortedByReliability[0];
-  const bestSupplier = sortedByReliability[sortedByReliability.length - 1];
+  const chartHeight = density === 'compact' ? 'compact' : 'comfortable';
 
-  // Critical and warning alerts
+  // Prepare chart data
+  const sortedByReliability = [...supplierPerformance].sort(
+    (a, b) => a.reliability_score - b.reliability_score
+  );
+
+  const combinedMarginData = [
+    ...(marginTrend?.historical || []).map(h => ({
+      date: h.date,
+      erosion: h.erosion,
+      type: 'historical' as const,
+    })),
+    ...(marginTrend?.forecast || []).map(f => ({
+      date: f.date,
+      erosion: f.predicted_erosion,
+      type: 'forecast' as const,
+    })),
+  ];
+
   const criticalAlerts = reorderAlerts.filter(a => a.alert_level === 'CRITICAL');
   const warningAlerts = reorderAlerts.filter(a => a.alert_level === 'WARNING');
-  const nextAlert = criticalAlerts[0] || warningAlerts[0];
-
-  // Prepare combined margin data
-  const combinedMarginData = marginTrend
-    ? [
-        ...marginTrend.historical.map(h => ({ ...h, type: 'actual' })),
-        ...marginTrend.forecast.map(f => ({ date: f.date, erosion: f.predicted_erosion, type: 'forecast' }))
-      ]
-    : [];
+  const displayAlerts = alertFilter === 'critical' ? criticalAlerts : reorderAlerts;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">🔮 Forecasting & Planning</h1>
-          <p className="text-slate-600">Predictive Analytics for Supply Chain Optimization</p>
-        </div>
-
-        {/* AI Explainer Banner */}
-        <div className="bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl shadow-xl p-6 mb-8 text-white">
-          <div className="flex items-start gap-4">
-            <div className="text-4xl">🤖</div>
-            <div className="flex-1">
-              <h3 className="text-xl font-bold mb-2">Powered by SAP Business Data Cloud + Business AI</h3>
-              <p className="text-sm text-purple-100 leading-relaxed">
-                This dashboard demonstrates how SAP Business AI can transform catch-weight data into actionable predictions.
-                Using machine learning algorithms, we analyze historical patterns to score supplier reliability (95% confidence intervals),
-                predict inventory stockouts (consumption-based forecasting), and forecast margin erosion (7-day moving average models).
-              </p>
-            </div>
+    <div className="min-h-screen bg-slate-50">
+      {/* Header with KPIs */}
+      <div className="bg-white border-b border-slate-200 p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-slate-900">✨ AI Insights & Forecasting</h1>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setDensity(density === 'compact' ? 'comfortable' : 'compact')}
+              className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+            >
+              {density === 'compact' ? '📏 Compact' : '📐 Comfortable'}
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+            >
+              🔄 Refresh
+            </button>
           </div>
         </div>
 
-        {/* Key Insights Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="text-sm text-slate-600 mb-2">⚠️ Highest Risk Supplier</div>
-            {worstSupplier ? (
-              <>
-                <div className="text-2xl font-bold text-red-600 mb-1">
-                  {worstSupplier.supplier_code}
-                </div>
-                <div className="text-sm text-slate-700">
-                  {worstSupplier.material_id} • {worstSupplier.reliability_score.toFixed(1)}% reliability
-                </div>
-              </>
-            ) : (
-              <div className="text-gray-500">No data</div>
-            )}
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="text-sm text-slate-600 mb-2">✅ Best Performer</div>
-            {bestSupplier ? (
-              <>
-                <div className="text-2xl font-bold text-green-600 mb-1">
-                  {bestSupplier.supplier_code}
-                </div>
-                <div className="text-sm text-slate-700">
-                  {bestSupplier.material_id} • {bestSupplier.reliability_score.toFixed(1)}% reliability
-                </div>
-              </>
-            ) : (
-              <div className="text-gray-500">No data</div>
-            )}
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="text-sm text-slate-600 mb-2">🔔 Next Reorder Alert</div>
-            {nextAlert ? (
-              <>
-                <div className="text-2xl font-bold text-yellow-600 mb-1">
-                  {nextAlert.days_of_stock_remaining?.toFixed(0) || '?'} days
-                </div>
-                <div className="text-sm text-slate-700">
-                  {nextAlert.material_id} @ {nextAlert.plant_id}
-                </div>
-              </>
-            ) : (
-              <div className="text-gray-500">No alerts</div>
-            )}
-          </div>
+        {/* Compact KPIs - Horizontal Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <CompactKPICard
+            icon="🎯"
+            value={`${summary?.avg_reliability_score.toFixed(1)}%`}
+            label="Avg Supplier Reliability"
+            status={
+              (summary?.avg_reliability_score || 0) > 90
+                ? 'success'
+                : (summary?.avg_reliability_score || 0) > 70
+                ? 'warning'
+                : 'danger'
+            }
+          />
+          <CompactKPICard
+            icon="⚠️"
+            value={summary?.critical_alerts || 0}
+            label="Critical Reorder Alerts"
+            status="danger"
+          />
+          <CompactKPICard
+            icon="📉"
+            value={`$${((summary?.avg_daily_erosion || 0) * 1).toFixed(0)}`}
+            label="Avg Daily Erosion"
+            status="warning"
+          />
         </div>
+      </div>
 
-        {/* Supplier Reliability Chart */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
-            🎯 Supplier Reliability - Top 10 Risk Areas
-            <InfoIcon explanation="This horizontal bar chart shows the 10 suppliers with the lowest reliability scores, sorted from worst to best. The reliability score (0-100%) is calculated using statistical analysis of historical receipt patterns, including drift consistency and volatility. Red bars (<70%) indicate high-risk suppliers requiring immediate attention, yellow (70-90%) shows moderate reliability, and green (>90%) indicates reliable suppliers. Focus on the red and yellow bars for contract renegotiation or supplier improvement initiatives." />
-          </h2>
-          <p className="text-sm text-slate-600 mb-6">
-            Focus on worst performers - sorted by reliability score (lower is worse)
-          </p>
+      {/* 2x2 Dashboard Grid */}
+      <div className="p-6">
+        <DashboardGrid cols={2} rows={2} gap={4}>
+          {/* Supplier Reliability - Top 10 Risk */}
+          <GridCell>
+            <ChartCard
+              title="Supplier Reliability - Top 10 Risk"
+              height={chartHeight}
+              infoText="The 10 suppliers with lowest reliability scores based on historical weight variance patterns. Red bars (<70%) indicate high risk requiring immediate attention."
+            >
+              <div className="space-y-2 h-full overflow-y-auto pr-2">
+                {sortedByReliability.slice(0, 10).map((supplier, idx) => (
+                  <div key={`${supplier.material_id}-${supplier.supplier_code}`} className="flex items-center gap-3">
+                    <div className="w-6 text-xs text-slate-500 font-mono">#{idx + 1}</div>
+                    <div className="w-24 text-xs font-medium text-slate-900 truncate">
+                      {supplier.supplier_code}
+                    </div>
+                    <div className="w-20 text-xs text-slate-600 font-mono truncate">
+                      {supplier.material_id}
+                    </div>
+                    <div className="flex-1">
+                      <div className="relative h-7 bg-slate-100 rounded overflow-hidden">
+                        <div
+                          className={`h-full flex items-center justify-end px-2 text-xs font-semibold transition-all ${
+                            supplier.reliability_score > 90
+                              ? 'bg-green-500 text-white'
+                              : supplier.reliability_score > 70
+                              ? 'bg-yellow-500 text-white'
+                              : 'bg-red-500 text-white'
+                          }`}
+                          style={{ width: `${supplier.reliability_score}%` }}
+                        >
+                          {supplier.reliability_score.toFixed(1)}%
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-16 text-right text-xs text-slate-600">
+                      ${(supplier.financial_exposure / 1000).toFixed(0)}k
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ChartCard>
+          </GridCell>
 
-          <div className="space-y-3">
-            {sortedByReliability.slice(0, 10).map((supplier, idx) => (
-              <div key={`${supplier.material_id}-${supplier.supplier_code}`} className="flex items-center gap-4">
-                <div className="w-8 text-right text-xs text-slate-500 font-mono">#{idx + 1}</div>
-                <div className="w-32 text-sm font-medium text-slate-900 truncate">
-                  {supplier.supplier_code}
+          {/* Margin Erosion Forecast */}
+          <GridCell>
+            <ChartCard
+              title="Margin Erosion Forecast (30-day)"
+              height={chartHeight}
+              infoText="Historical margin erosion (solid line) and projected future trends (dashed line) based on 7-day moving average. Helps finance teams anticipate budget impacts."
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={combinedMarginData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 11 }}
+                    tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    formatter={(value: any) => [`$${value.toFixed(0)}`, 'Erosion']}
+                    labelFormatter={(date) => new Date(date).toLocaleDateString()}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="erosion"
+                    stroke="#ef4444"
+                    fill="#fca5a5"
+                    strokeWidth={2}
+                    strokeDasharray={(entry: any) => entry && entry.type === 'forecast' ? '5 5' : '0'}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ChartCard>
+          </GridCell>
+
+          {/* Reorder Alerts - Scrollable */}
+          <GridCell>
+            <ChartCard
+              title="Inventory Reorder Alerts"
+              height={chartHeight}
+              infoText="Materials at risk of stockout using consumption-based forecasting. Critical alerts (<7 days) require immediate action to prevent production disruptions."
+              actions={
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setAlertFilter('all')}
+                    className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                      alertFilter === 'all'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
+                    }`}
+                  >
+                    All ({reorderAlerts.length})
+                  </button>
+                  <button
+                    onClick={() => setAlertFilter('critical')}
+                    className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                      alertFilter === 'critical'
+                        ? 'bg-red-600 text-white'
+                        : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
+                    }`}
+                  >
+                    Critical ({criticalAlerts.length})
+                  </button>
                 </div>
-                <div className="w-24 text-xs text-slate-600 font-mono truncate">
-                  {supplier.material_id}
-                </div>
-                <div className="flex-1">
-                  <div className="relative h-8 bg-slate-100 rounded overflow-hidden">
+              }
+            >
+              <div className="h-full overflow-y-auto space-y-2 pr-2">
+                {displayAlerts.length > 0 ? (
+                  displayAlerts.map((alert) => (
                     <div
-                      className={`h-full flex items-center justify-end px-3 text-xs font-semibold transition-all ${
-                        supplier.reliability_score > 90
-                          ? 'bg-green-500 text-white'
-                          : supplier.reliability_score > 70
-                          ? 'bg-yellow-500 text-white'
-                          : 'bg-red-500 text-white'
+                      key={`${alert.material_id}-${alert.plant_id}-${alert.storage_location}`}
+                      className={`p-3 rounded-lg border-l-4 ${
+                        alert.alert_level === 'CRITICAL'
+                          ? 'bg-red-50 border-red-500'
+                          : 'bg-yellow-50 border-yellow-500'
                       }`}
-                      style={{ width: `${supplier.reliability_score}%` }}
                     >
-                      {supplier.reliability_score.toFixed(1)}%
-                    </div>
-                  </div>
-                </div>
-                <div className="w-20 text-right text-xs text-slate-600">
-                  {supplier.avg_drift_pct > 0 ? '+' : ''}{supplier.avg_drift_pct.toFixed(2)}% drift
-                </div>
-                <div className="w-24 text-right text-xs text-slate-600">
-                  ${(supplier.financial_exposure / 1000).toFixed(1)}k
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Weight Variance Predictions Table */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
-            ⚖️ Weight Variance Predictions
-            <InfoIcon explanation="This table shows predicted weight drift ranges for each supplier-material combination. The 'Current Drift' reflects historical average, while 'Predicted Range' uses a 95% confidence interval based on statistical modeling of past patterns. Financial exposure estimates the potential cost impact of weight variance. Reliability scores help prioritize which suppliers need attention or contract renegotiation." />
-          </h2>
-          <p className="text-sm text-slate-600 mb-6">
-            Predicted drift ranges based on historical patterns (95% confidence interval)
-          </p>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Material</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Supplier</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Current Drift</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Predicted Range</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Reliability</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Exposure</th>
-                </tr>
-              </thead>
-              <tbody>
-                {supplierPerformance.slice(0, 10).map((supplier) => (
-                  <tr key={`${supplier.material_id}-${supplier.supplier_code}`} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="py-3 px-4 text-sm text-slate-700 font-mono">{supplier.material_id}</td>
-                    <td className="py-3 px-4 text-sm text-slate-700 font-mono">{supplier.supplier_code}</td>
-                    <td className="py-3 px-4 text-sm text-slate-700">
-                      {supplier.avg_drift_pct > 0 ? '+' : ''}{supplier.avg_drift_pct.toFixed(2)}%
-                    </td>
-                    <td className="py-3 px-4 text-sm text-slate-700">
-                      {supplier.forecast_range.min.toFixed(2)}% to {supplier.forecast_range.max.toFixed(2)}%
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
-                          supplier.reliability_score > 90
-                            ? 'bg-green-100 text-green-800'
-                            : supplier.reliability_score > 70
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
-                        {supplier.reliability_score.toFixed(1)}%
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-slate-700">${supplier.financial_exposure.toFixed(0)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Margin Erosion Forecast */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
-            📉 Margin Erosion Forecast (30-day)
-            <InfoIcon explanation="This area chart visualizes historical margin erosion (solid line) and projected future trends (dashed line). Margin erosion occurs when actual received weights differ from ordered weights, leading to financial discrepancies. The forecast uses a 7-day moving average model to predict future erosion based on recent patterns. This helps finance teams anticipate budget impacts and identify periods requiring closer monitoring." />
-          </h2>
-          <p className="text-sm text-slate-600 mb-6">
-            Historical erosion (solid) vs. predicted trend (dashed). Based on 7-day moving average.
-          </p>
-
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={combinedMarginData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="date"
-                tick={{ fontSize: 11 }}
-                angle={-45}
-                textAnchor="end"
-                height={80}
-              />
-              <YAxis label={{ value: 'Margin Erosion ($)', angle: -90, position: 'insideLeft' }} />
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const data = payload[0].payload;
-                    return (
-                      <div className="bg-white p-3 border rounded shadow-lg">
-                        <p className="text-sm font-semibold">{data.date}</p>
-                        <p className="text-sm">
-                          {data.type === 'forecast' ? 'Predicted' : 'Actual'}: ${data.erosion?.toFixed(2)}
-                        </p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-              <Area
-                type="monotone"
-                dataKey="erosion"
-                stroke="#8884d8"
-                fill="#8884d8"
-                fillOpacity={0.6}
-                strokeWidth={2}
-                strokeDasharray="5 5"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Reorder Alerts */}
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
-            🔔 Inventory Reorder Alerts
-            <InfoIcon explanation="This section identifies materials at risk of stockout using consumption-based forecasting. The system calculates average daily consumption from historical movement data and compares it to current stock levels. Critical alerts (<7 days remaining) require immediate action, while Warning alerts (7-14 days) should be monitored. This predictive approach prevents production disruptions by flagging reorder needs before inventory runs out." />
-          </h2>
-          <p className="text-sm text-slate-600 mb-6">
-            Materials at risk of stockout based on consumption patterns. Critical = {'<'}7 days, Warning = {'<'}14 days.
-          </p>
-
-          {criticalAlerts.length > 0 && (
-            <div className="mb-6">
-              <div className="text-red-600 font-semibold mb-3 flex items-center gap-2">
-                <span className="text-xl">⚠️</span>
-                Critical Alerts ({criticalAlerts.length})
-              </div>
-              <div className="space-y-2">
-                {criticalAlerts.map((alert) => (
-                  <div
-                    key={`${alert.material_id}-${alert.plant_id}-${alert.storage_location}`}
-                    className="border border-red-200 bg-red-50 rounded-lg p-4"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="font-semibold text-red-900">
-                          {alert.material_id} @ {alert.plant_id}
+                      <div className="flex items-start justify-between mb-1">
+                        <div className="font-semibold text-sm text-slate-900">
+                          {alert.material_id}
                         </div>
-                        <div className="text-sm text-red-700">
-                          Stock: {alert.current_stock.toFixed(0)} units • Consumption: {alert.avg_daily_consumption.toFixed(1)}/day
+                        <div
+                          className={`text-xs font-bold px-2 py-0.5 rounded ${
+                            alert.alert_level === 'CRITICAL'
+                              ? 'bg-red-200 text-red-800'
+                              : 'bg-yellow-200 text-yellow-800'
+                          }`}
+                        >
+                          {alert.alert_level}
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-red-600">
-                          {alert.days_of_stock_remaining?.toFixed(0) || '?'} days
+                      <div className="text-xs text-slate-600 space-y-0.5">
+                        <div>Stock: {alert.current_stock.toFixed(0)} units</div>
+                        <div>
+                          Days Remaining:{' '}
+                          <span className="font-semibold">
+                            {alert.days_of_stock_remaining?.toFixed(1) || 'N/A'}
+                          </span>
                         </div>
-                        <div className="text-xs text-red-600">remaining</div>
+                        <div className="text-xs text-slate-500">
+                          {alert.plant_id} / {alert.storage_location}
+                        </div>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="h-full flex items-center justify-center text-slate-500 text-sm">
+                    No alerts to display
                   </div>
-                ))}
+                )}
               </div>
-            </div>
-          )}
+            </ChartCard>
+          </GridCell>
 
-          {warningAlerts.length > 0 && (
-            <div className="mb-6">
-              <div className="text-yellow-600 font-semibold mb-3 flex items-center gap-2">
-                <span className="text-xl">⚠️</span>
-                Warning Alerts ({warningAlerts.length})
-              </div>
-              <div className="space-y-2">
-                {warningAlerts.map((alert) => (
-                  <div
-                    key={`${alert.material_id}-${alert.plant_id}-${alert.storage_location}`}
-                    className="border border-yellow-200 bg-yellow-50 rounded-lg p-4"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="font-semibold text-yellow-900">
-                          {alert.material_id} @ {alert.plant_id}
-                        </div>
-                        <div className="text-sm text-yellow-700">
-                          Stock: {alert.current_stock.toFixed(0)} units • Consumption: {alert.avg_daily_consumption.toFixed(1)}/day
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-yellow-600">
-                          {alert.days_of_stock_remaining?.toFixed(0) || '?'} days
-                        </div>
-                        <div className="text-xs text-yellow-600">remaining</div>
-                      </div>
-                    </div>
+          {/* Variance Predictions Summary */}
+          <GridCell>
+            <ChartCard
+              title="Weight Variance Predictions"
+              height={chartHeight}
+              infoText="Summary statistics for predicted weight drift ranges across all supplier-material combinations. Shows high-risk suppliers requiring contract renegotiation."
+            >
+              <div className="h-full flex flex-col justify-center space-y-3 px-4">
+                <div className="bg-slate-50 rounded-lg p-4">
+                  <div className="text-sm text-slate-600 mb-1">Total Suppliers Tracked</div>
+                  <div className="text-3xl font-bold text-slate-900">
+                    {summary?.total_suppliers || 0}
                   </div>
-                ))}
+                </div>
+                <div className="bg-slate-50 rounded-lg p-4">
+                  <div className="text-sm text-slate-600 mb-1">Materials Under Monitoring</div>
+                  <div className="text-2xl font-bold text-slate-900">
+                    {summary?.total_materials_tracked || 0}
+                  </div>
+                </div>
+                <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+                  <div className="text-sm text-red-700 mb-1">High-Risk Suppliers</div>
+                  <div className="text-2xl font-bold text-red-600">
+                    {sortedByReliability.filter(s => s.reliability_score < 70).length}
+                  </div>
+                  <div className="text-xs text-red-600 mt-1">
+                    Reliability {'<'} 70%
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
-
-          {criticalAlerts.length === 0 && warningAlerts.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
-              <div className="text-4xl mb-2">✅</div>
-              <div className="text-lg font-medium">All materials have sufficient stock</div>
-              <div className="text-sm">No reorder alerts at this time</div>
-            </div>
-          )}
-        </div>
+            </ChartCard>
+          </GridCell>
+        </DashboardGrid>
       </div>
     </div>
   );
