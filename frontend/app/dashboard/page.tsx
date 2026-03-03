@@ -95,7 +95,7 @@ export default function ExecutiveDashboard() {
           apiFetch<WeightDriftSummary>('/v1/dataproducts/weight-drift/summary'),
           apiFetch<MarginErosionSummary>('/v1/dataproducts/margin-erosion/summary'),
           apiFetch<ForecastingSummary>('/v1/forecasting/summary'),
-          apiFetch<WeightDriftRecord[]>('/v1/dataproducts/weight-drift'),
+          apiFetch<WeightDriftRecord[]>('/v1/dataproducts/weight-drift/daily'),
           apiFetch<SupplierPerformance[]>('/v1/forecasting/supplier-performance'),
         ]);
 
