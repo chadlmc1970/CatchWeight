@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
+import { apiFetch } from '@/lib/api';
 
 interface WeightDriftSummary {
   total_transactions: number;
@@ -57,11 +58,11 @@ export default function DataProductsPage() {
       setLoading(true);
       try {
         const [wdSummary, meSummary, wdByMat, meByMat, wdRecords] = await Promise.all([
-          fetch('http://localhost:8000/v1/dataproducts/weight-drift/summary').then(r => r.json()),
-          fetch('http://localhost:8000/v1/dataproducts/margin-erosion/summary').then(r => r.json()),
-          fetch('http://localhost:8000/v1/dataproducts/weight-drift/by-material').then(r => r.json()),
-          fetch('http://localhost:8000/v1/dataproducts/margin-erosion/by-material').then(r => r.json()),
-          fetch('http://localhost:8000/v1/dataproducts/weight-drift?limit=20').then(r => r.json()),
+          apiFetch('/v1/dataproducts/weight-drift/summary'),
+          apiFetch('/v1/dataproducts/margin-erosion/summary'),
+          apiFetch('/v1/dataproducts/weight-drift/by-material'),
+          apiFetch('/v1/dataproducts/margin-erosion/by-material'),
+          apiFetch('/v1/dataproducts/weight-drift?limit=20'),
         ]);
 
         setWeightDriftSummary(wdSummary);
