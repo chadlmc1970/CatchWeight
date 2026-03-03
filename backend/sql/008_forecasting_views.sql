@@ -29,8 +29,9 @@ SELECT
     AVG(avg_drift_pct) as supplier_avg_drift,
     AVG(stddev_drift_pct) as supplier_drift_volatility,
     SUM(avg_exposure) as total_exposure,
-    -- Reliability score: 100 - abs(avg_drift) - volatility
-    GREATEST(0, 100 - ABS(AVG(avg_drift_pct)) - AVG(stddev_drift_pct)) as reliability_score,
+    -- Reliability score: 100 - (drift penalty * 10) - (volatility penalty * 15)
+    -- More aggressive penalties to create meaningful differentiation
+    GREATEST(0, 100 - (ABS(AVG(avg_drift_pct)) * 10) - (AVG(stddev_drift_pct) * 15)) as reliability_score,
     -- Predicted drift range (95% confidence interval: mean ± 2*stddev)
     AVG(avg_drift_pct) - 2 * AVG(stddev_drift_pct) as predicted_drift_min,
     AVG(avg_drift_pct) + 2 * AVG(stddev_drift_pct) as predicted_drift_max
