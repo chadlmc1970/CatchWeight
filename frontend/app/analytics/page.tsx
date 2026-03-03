@@ -58,11 +58,11 @@ export default function DataProductsPage() {
       setLoading(true);
       try {
         const [wdSummary, meSummary, wdByMat, meByMat, wdRecords] = await Promise.all([
-          apiFetch('/v1/dataproducts/weight-drift/summary'),
-          apiFetch('/v1/dataproducts/margin-erosion/summary'),
-          apiFetch('/v1/dataproducts/weight-drift/by-material'),
-          apiFetch('/v1/dataproducts/margin-erosion/by-material'),
-          apiFetch('/v1/dataproducts/weight-drift?limit=20'),
+          apiFetch<WeightDriftSummary>('/v1/dataproducts/weight-drift/summary'),
+          apiFetch<MarginErosionSummary>('/v1/dataproducts/margin-erosion/summary'),
+          apiFetch<MaterialMetric[]>('/v1/dataproducts/weight-drift/by-material'),
+          apiFetch<MaterialMetric[]>('/v1/dataproducts/margin-erosion/by-material'),
+          apiFetch<WeightDriftRecord[]>('/v1/dataproducts/weight-drift?limit=20'),
         ]);
 
         setWeightDriftSummary(wdSummary);
