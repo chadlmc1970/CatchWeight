@@ -29,7 +29,7 @@ def get_supplier_performance():
                     predicted_drift_max,
                     total_exposure
                 FROM v_supplier_performance_profile
-                ORDER BY total_exposure DESC
+                ORDER BY reliability_score ASC, total_exposure DESC
             """).fetchall()
 
         return [
