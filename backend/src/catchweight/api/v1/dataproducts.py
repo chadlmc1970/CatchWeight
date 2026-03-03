@@ -28,10 +28,10 @@ class WeightDriftRecord(BaseModel):
 
 
 class WeightDriftSummary(BaseModel):
-    total_transactions: int
-    total_drift_lb: float
+    total_receipts: int  # Changed from total_transactions
+    total_drift_kg: float  # Changed from total_drift_lb
     avg_drift_pct: float
-    total_financial_exposure: float
+    total_cost_impact: float  # Changed from total_financial_exposure
     max_drift_pct: float
     min_drift_pct: float
 
@@ -56,11 +56,9 @@ class MarginErosionRecord(BaseModel):
 
 
 class MarginErosionSummary(BaseModel):
-    total_transactions: int
-    total_margin_erosion: float
+    total_erosion: float  # Changed from total_margin_erosion
     avg_erosion_pct: float
-    total_expected_margin: float
-    total_actual_margin: float
+    affected_materials: int  # Added new field
 
 
 def get_db():
@@ -145,15 +143,48 @@ def get_weight_drift_summary():
             row = conn.execute(query).fetchone()
 
             return WeightDriftSummary(
-                total_transactions=row[0] or 0,
-                total_drift_lb=float(row[1] or 0),
+                total_receipts=row[0] or 0,  # Changed from total_transactions
+                total_drift_kg=float(row[1] or 0) * 0.453592,  # Convert lb to kg
                 avg_drift_pct=float(row[2] or 0),
-                total_financial_exposure=float(row[3] or 0),
+                total_cost_impact=float(row[3] or 0),  # Changed from total_financial_exposure
                 max_drift_pct=float(row[4] or 0),
                 min_drift_pct=float(row[5] or 0),
             )
     except Exception as e:
         logger.error(f"Error fetching weight drift summary: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/dataproducts/weight-drift/daily")
+def get_weight_drift_daily():
+    """Get weight drift aggregated by day for charts."""
+    try:
+        with get_db() as conn:
+            conn.execute("SET search_path TO sap_poc")
+
+            query = """
+                SELECT
+                    posting_date::text as date,
+                    SUM(drift_lb) * 0.453592 as drift_kg,
+                    AVG(drift_pct) as drift_pct
+                FROM v_weight_drift_trend
+                GROUP BY posting_date
+                ORDER BY posting_date DESC
+                LIMIT 90
+            """
+
+            rows = conn.execute(query).fetchall()
+
+            return [
+                {
+                    "date": row[0],
+                    "drift_kg": float(row[1] or 0),
+                    "drift_pct": float(row[2] or 0),
+                }
+                for row in rows
+            ]
+    except Exception as e:
+        logger.error(f"Error fetching daily weight drift: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -225,22 +256,18 @@ def get_margin_erosion_summary():
 
             query = """
                 SELECT
-                    COUNT(*) as total_transactions,
                     SUM(margin_erosion_usd) as total_margin_erosion,
                     AVG(erosion_pct) as avg_erosion_pct,
-                    SUM(expected_margin_usd) as total_expected_margin,
-                    SUM(actual_margin_usd) as total_actual_margin
+                    COUNT(DISTINCT material_id) as affected_materials
                 FROM v_margin_erosion
             """
 
             row = conn.execute(query).fetchone()
 
             return MarginErosionSummary(
-                total_transactions=row[0] or 0,
-                total_margin_erosion=float(row[1] or 0),
-                avg_erosion_pct=float(row[2] or 0),
-                total_expected_margin=float(row[3] or 0),
-                total_actual_margin=float(row[4] or 0),
+                total_erosion=float(row[0] or 0),
+                avg_erosion_pct=float(row[1] or 0),
+                affected_materials=row[2] or 0,
             )
     except Exception as e:
         logger.error(f"Error fetching margin erosion summary: {e}")
