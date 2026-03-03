@@ -18,6 +18,34 @@ import {
 } from 'recharts';
 import { apiFetch } from '@/lib/api';
 
+// Info Icon Component
+function InfoIcon({ explanation }: { explanation: string }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div className="inline-block relative">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 text-xs font-bold transition-colors cursor-pointer"
+        aria-label="Information"
+      >
+        i
+      </button>
+      {isExpanded && (
+        <div className="absolute z-10 mt-2 w-80 p-4 bg-white rounded-lg shadow-xl border border-gray-200 text-sm text-gray-700 leading-relaxed">
+          <button
+            onClick={() => setIsExpanded(false)}
+            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+          >
+            ✕
+          </button>
+          <p>{explanation}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface SupplierPerformance {
   material_id: string;
   supplier_code: string;
@@ -204,7 +232,10 @@ export default function ForecastingPage() {
 
         {/* Supplier Reliability Chart */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">🎯 Supplier Reliability Scores</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
+            🎯 Supplier Reliability Scores
+            <InfoIcon explanation="This scatter chart plots each supplier's average weight drift percentage against their reliability score. The reliability score (0-100%) is calculated using statistical analysis of historical receipt patterns, including drift consistency and volatility. Green dots indicate highly reliable suppliers (>90%), yellow shows moderate reliability (70-90%), and red indicates high-risk suppliers (<70%). Use this to identify which suppliers consistently deliver accurate weights." />
+          </h2>
           <p className="text-sm text-slate-600 mb-6">
             Weight drift vs. reliability score. Green = highly reliable, Yellow = moderate, Red = risky.
           </p>
@@ -262,7 +293,10 @@ export default function ForecastingPage() {
 
         {/* Weight Variance Predictions Table */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">⚖️ Weight Variance Predictions</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
+            ⚖️ Weight Variance Predictions
+            <InfoIcon explanation="This table shows predicted weight drift ranges for each supplier-material combination. The 'Current Drift' reflects historical average, while 'Predicted Range' uses a 95% confidence interval based on statistical modeling of past patterns. Financial exposure estimates the potential cost impact of weight variance. Reliability scores help prioritize which suppliers need attention or contract renegotiation." />
+          </h2>
           <p className="text-sm text-slate-600 mb-6">
             Predicted drift ranges based on historical patterns (95% confidence interval)
           </p>
@@ -313,7 +347,10 @@ export default function ForecastingPage() {
 
         {/* Margin Erosion Forecast */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">📉 Margin Erosion Forecast (30-day)</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
+            📉 Margin Erosion Forecast (30-day)
+            <InfoIcon explanation="This area chart visualizes historical margin erosion (solid line) and projected future trends (dashed line). Margin erosion occurs when actual received weights differ from ordered weights, leading to financial discrepancies. The forecast uses a 7-day moving average model to predict future erosion based on recent patterns. This helps finance teams anticipate budget impacts and identify periods requiring closer monitoring." />
+          </h2>
           <p className="text-sm text-slate-600 mb-6">
             Historical erosion (solid) vs. predicted trend (dashed). Based on 7-day moving average.
           </p>
@@ -360,7 +397,10 @@ export default function ForecastingPage() {
 
         {/* Reorder Alerts */}
         <div className="bg-white rounded-xl shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">🔔 Inventory Reorder Alerts</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
+            🔔 Inventory Reorder Alerts
+            <InfoIcon explanation="This section identifies materials at risk of stockout using consumption-based forecasting. The system calculates average daily consumption from historical movement data and compares it to current stock levels. Critical alerts (<7 days remaining) require immediate action, while Warning alerts (7-14 days) should be monitored. This predictive approach prevents production disruptions by flagging reorder needs before inventory runs out." />
+          </h2>
           <p className="text-sm text-slate-600 mb-6">
             Materials at risk of stockout based on consumption patterns. Critical = {'<'}7 days, Warning = {'<'}14 days.
           </p>
