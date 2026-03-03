@@ -31,6 +31,7 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:3001",
         "https://catchweight-api.onrender.com",
+        "https://catchweight-dashboard.onrender.com",
     ],
     allow_credentials=False,
     allow_methods=["*"],
