@@ -51,9 +51,11 @@ Tracks weight variance from baseline (expected vs actual):
 **SQL View**: `v_margin_erosion`
 
 Tracks margin loss due to catch weight variance:
+- **Uses batch-tracked actual weights** (NOT MARM conversion)
+- Calculates expected issue weight from batch receipt average
 - 2 sales/production issue transactions
-- Chicken wings: $4.20 erosion (0.33%)
-- Chicken breast: -$2.60 (negative erosion = gain)
+- Chicken breast: $0.07 erosion (+0.01%) - shipped 0.02 LB more than batch average
+- Chicken wings: -$0.08 erosion (-0.01%) - shipped 0.04 LB less than batch average
 
 ### 4. API Endpoints ✅
 
@@ -183,6 +185,43 @@ postgresql://neondb_owner:npg_V2ALZjiI5qtr@ep-dark-hill-aiwdm4cf-pooler.c-4.us-e
 **Schema**: `sap_poc`
 
 **Tables**: 14 (all S/4HANA catch weight tables + views)
+
+---
+
+## Catch Weight Logic — Technical Notes
+
+### MARM Table Purpose
+The MARM table (UoM conversions) stores **planning weights only**:
+- Example: `CHKBRST-001: 25 LB/CS` is the nominal/standard weight
+- Used ONLY for planning, forecasting, and initial estimates
+- **NOT used for actual transaction calculations**
+
+### Actual Weight Tracking
+Each physical transaction captures its own actual weight:
+- **Receipt**: 100 CS received → weighed at 2,508.25 LB (actual: 25.0825 LB/CS)
+- **Issue**: 20 CS issued → weighed at 598.00 LB (actual: 29.90 LB/CS)
+- Weights can vary to hundredths of a pound
+
+### Weight Drift Calculation
+Compares actual receipt weight to MARM planning baseline:
+- Expected (from MARM): 100 CS × 25 LB = 2,500 LB
+- Actual (weighed): 2,508.25 LB
+- Drift: +8.25 LB (+0.33% vs. plan)
+
+**Use Case**: Track how much actual weights deviate from planning assumptions
+
+### Margin Erosion Calculation
+Compares actual issue weight to **batch-tracked receipt average**:
+- Batch B20260225 receipts: 125 CS at 3,134.75 LB = **25.078 LB/CS actual**
+- Expected issue: 10 CS × 25.078 = 250.78 LB
+- Actual issue: 250.80 LB
+- Erosion: +0.02 LB shipped more than received average = margin loss
+
+**Use Case**: Track margin variance when issuing/shipping from batches
+
+**Key Difference**:
+- Weight Drift uses **MARM planning weights** (vs. plan)
+- Margin Erosion uses **batch receipt actual weights** (vs. what we actually received)
 
 ---
 

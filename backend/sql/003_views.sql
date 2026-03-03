@@ -106,9 +106,30 @@ ORDER BY posting_date DESC, ABS(drift_pct) DESC;
 -- ============================================================
 -- DATA PRODUCT 2: CWM_Margin_Erosion_DP
 -- Tracks margin loss due to catch weight variance
+-- FIXED: Uses batch-tracked actual weights from receipts, not MARM conversion
 -- ============================================================
 CREATE OR REPLACE VIEW v_margin_erosion AS
-WITH sales_movements AS (
+WITH batch_receipt_weights AS (
+    -- Calculate actual weight per case from RECEIPTS for each batch
+    -- This is the "expected" weight when issuing from this batch
+    SELECT
+        seg.material_id,
+        seg.plant_id,
+        seg.storage_location,
+        seg.batch_id,
+        SUM(seg.quantity_base_uom) AS total_received_cases,
+        SUM(seg.quantity_parallel_uom) AS total_received_weight,
+        -- Actual average weight per case for this batch (from receipts)
+        SUM(seg.quantity_parallel_uom) / NULLIF(SUM(seg.quantity_base_uom), 0) AS batch_avg_weight_per_case
+    FROM mseg seg
+    JOIN mara mat
+        ON seg.material_id = mat.material_id
+    WHERE mat.catch_weight_flag = TRUE
+        AND seg.movement_type = '101'  -- Goods receipts only
+        AND seg.quantity_base_uom > 0
+    GROUP BY seg.material_id, seg.plant_id, seg.storage_location, seg.batch_id
+),
+sales_movements AS (
     SELECT
         seg.material_id,
         seg.plant_id,
@@ -117,8 +138,8 @@ WITH sales_movements AS (
         hdr.posting_date,
         seg.quantity_base_uom AS qty_cases,
         seg.quantity_parallel_uom AS actual_shipped_lb,
-        -- Expected/planned weight
-        seg.quantity_base_uom * (uom.numerator / uom.denominator) AS expected_shipped_lb,
+        -- Expected weight based on batch's actual receipt average (NOT MARM)
+        ABS(seg.quantity_base_uom) * brw.batch_avg_weight_per_case AS expected_shipped_lb,
         -- Pricing
         CASE
             WHEN val.price_control = 'S' THEN val.standard_price
@@ -133,15 +154,19 @@ WITH sales_movements AS (
         AND seg.document_year = hdr.document_year
     JOIN mara mat
         ON seg.material_id = mat.material_id
-    JOIN marm uom
-        ON seg.material_id = uom.material_id
-        AND seg.uom_parallel = uom.alt_uom
+    -- Join to batch receipt weights to get actual average
+    LEFT JOIN batch_receipt_weights brw
+        ON seg.material_id = brw.material_id
+        AND seg.plant_id = brw.plant_id
+        AND seg.storage_location = brw.storage_location
+        AND seg.batch_id = brw.batch_id
     LEFT JOIN mbew val
         ON seg.material_id = val.material_id
         AND seg.plant_id = val.plant_id
     WHERE mat.catch_weight_flag = TRUE
         AND seg.movement_type IN ('601', '261')  -- Customer sales & production issues
         AND seg.quantity_base_uom < 0  -- Issues are negative
+        AND brw.batch_avg_weight_per_case IS NOT NULL  -- Must have receipt data
 )
 SELECT
     material_id,
@@ -151,12 +176,13 @@ SELECT
     posting_date,
     qty_cases,
     expected_shipped_lb,
-    actual_shipped_lb,
+    ABS(actual_shipped_lb) AS actual_shipped_lb,
     -- Margin calculation
-    ABS(expected_shipped_lb) * unit_price AS expected_margin_usd,
+    expected_shipped_lb * unit_price AS expected_margin_usd,
     ABS(actual_shipped_lb) * unit_price AS actual_margin_usd,
-    (ABS(expected_shipped_lb) - ABS(actual_shipped_lb)) * unit_price AS margin_erosion_usd,
-    ((ABS(expected_shipped_lb) - ABS(actual_shipped_lb)) / ABS(expected_shipped_lb) * 100) AS erosion_pct,
+    -- Erosion = shipped MORE weight than batch average = margin LOSS
+    (ABS(actual_shipped_lb) - expected_shipped_lb) * unit_price AS margin_erosion_usd,
+    ((ABS(actual_shipped_lb) - expected_shipped_lb) / expected_shipped_lb * 100) AS erosion_pct,
     unit_price AS price_per_lb,
     movement_type,
     user_id
