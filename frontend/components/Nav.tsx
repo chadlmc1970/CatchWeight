@@ -8,7 +8,6 @@ const links = [
   { href: "/", label: "🏠 Overview" },
   { href: "/analytics", label: "📊 Analytics" },
   { href: "/forecasting", label: "✨ AI Insights" },
-  { href: "/schema", label: "🗄️ Schema" },
   { href: "/materials", label: "Materials" },
   { href: "/movements", label: "Goods Movement" },
   { href: "/inventory", label: "Inventory" },
