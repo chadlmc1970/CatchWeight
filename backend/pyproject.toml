@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=65.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "catchweight"
+version = "0.1.0"
+description = "SAP S4 Catch-Weight Valuation POC"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn>=0.34.0",
+    "psycopg[binary]>=3.2.0",
+    "pydantic>=2.10.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
