@@ -62,7 +62,7 @@ export default function DataProductsPage() {
           apiFetch<MarginErosionSummary>('/v1/dataproducts/margin-erosion/summary'),
           apiFetch<MaterialMetric[]>('/v1/dataproducts/weight-drift/by-material'),
           apiFetch<MaterialMetric[]>('/v1/dataproducts/margin-erosion/by-material'),
-          apiFetch<WeightDriftRecord[]>('/v1/dataproducts/weight-drift?limit=20'),
+          apiFetch<WeightDriftRecord[]>('/v1/dataproducts/weight-drift'),
         ]);
 
         setWeightDriftSummary(wdSummary);
@@ -92,7 +92,7 @@ export default function DataProductsPage() {
   }
 
   const chartTrendData = Array.isArray(weightDriftRecords)
-    ? weightDriftRecords.slice(0, 10).reverse().map(r => ({
+    ? weightDriftRecords.reverse().map(r => ({
         date: r.posting_date,
         drift: Math.abs(r.drift_pct),
         exposure: r.financial_exposure_usd,
