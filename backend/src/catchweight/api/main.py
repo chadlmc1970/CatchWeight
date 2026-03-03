@@ -8,7 +8,7 @@ import os
 import psycopg
 import traceback
 
-from catchweight.api.v1 import materials, movements, stock, valuation, reconciliation, seed
+from catchweight.api.v1 import materials, movements, stock, valuation, reconciliation, seed, dataproducts
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +30,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:3001",
+        "https://*.onrender.com",
+        "https://*.vercel.app",
     ],
     allow_credentials=False,
     allow_methods=["*"],
@@ -42,6 +44,7 @@ app.include_router(stock.router, prefix="/v1")
 app.include_router(valuation.router, prefix="/v1")
 app.include_router(reconciliation.router, prefix="/v1")
 app.include_router(seed.router, prefix="/v1")
+app.include_router(dataproducts.router, prefix="/v1")
 
 
 @app.get("/health")
