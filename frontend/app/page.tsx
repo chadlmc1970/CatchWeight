@@ -8,30 +8,49 @@ export default function HomePage() {
 
   return (
     <div className="-mx-6 -my-8 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800">
+      {/* Hero Section - Enhanced with AI Focus */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-700 to-purple-800">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:32px_32px]"></div>
-        <div className="relative px-8 py-20 max-w-7xl mx-auto">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center border-2 border-white/20">
-              <span className="text-4xl">⚖️</span>
+        <div className="relative px-8 py-16 max-w-7xl mx-auto">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center border-2 border-white/20 flex-shrink-0">
+                <span className="text-4xl">⚖️</span>
+              </div>
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-5xl font-black text-white">
+                    Catch Weight Intelligence
+                  </h1>
+                  <span className="px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-bold rounded-full">
+                    AI-Powered
+                  </span>
+                </div>
+                <p className="text-xl text-blue-100 font-medium max-w-3xl">
+                  Real-time weight variance tracking meets predictive analytics for SAP S/4HANA
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-5xl font-black text-white mb-2">
-                SAP S/4HANA Catch Weight POC
-              </h1>
-              <p className="text-xl text-blue-100 font-medium">
-                Demonstrating End-to-End Inventory Management with Weight Variance Tracking
-              </p>
-            </div>
+            <Link
+              href="/forecasting"
+              className="px-6 py-3 bg-white text-blue-600 font-bold text-lg rounded-xl hover:bg-blue-50 transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-105 flex items-center gap-2 whitespace-nowrap"
+            >
+              <span>✨</span> View AI Insights
+            </Link>
           </div>
 
-          <div className="mt-12 grid md:grid-cols-3 gap-6">
+          <div className="mt-8 grid md:grid-cols-4 gap-4">
+            <StatBox
+              icon="🤖"
+              label="AI Forecasting"
+              value="Active"
+              description="Predictive analytics enabled"
+            />
             <StatBox
               icon="📊"
               label="Data Products"
-              value="2"
-              description="Real-time analytics views"
+              value="5"
+              description="Real-time analytical views"
             />
             <StatBox
               icon="📦"
@@ -40,10 +59,10 @@ export default function HomePage() {
               description="Catch-weight items"
             />
             <StatBox
-              icon="🎯"
-              label="Movement Types"
-              value="5+"
-              description="Goods movements tracked"
+              icon="⚡"
+              label="Real-Time"
+              value="Live"
+              description="Instant reconciliation"
             />
           </div>
         </div>
@@ -51,13 +70,47 @@ export default function HomePage() {
 
       {/* Main Content */}
       <div className="px-8 py-12 max-w-7xl mx-auto space-y-12">
+        {/* AI & Intelligence Section - NEW! */}
+        <section>
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold mb-4">
+              <span>🚀</span> Latest Enhancements
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-3">AI-Powered Intelligence Layer</h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Advanced predictive analytics and forecasting capabilities built on real-time catch-weight data
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            <AIFeatureCard
+              icon="🤖"
+              title="Supplier Performance AI"
+              description="Machine learning-based reliability scoring with predicted variance ranges"
+              badge="ML"
+            />
+            <AIFeatureCard
+              icon="📊"
+              title="Margin Forecasting"
+              description="30-day erosion predictions using 7-day moving average with confidence bands"
+              badge="Predictive"
+            />
+            <AIFeatureCard
+              icon="⚠️"
+              title="Smart Reorder Alerts"
+              description="Consumption-based inventory alerts to prevent stockouts"
+              badge="Real-time"
+            />
+          </div>
+        </section>
+
         {/* POC Overview */}
         <section>
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">Proof of Concept Overview</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Enterprise Catch-Weight Solution</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              This POC demonstrates SAP S/4HANA catch-weight material management with full inventory tracking,
-              valuation, and real-time analytics for weight variance and margin impact analysis.
+              End-to-end SAP S/4HANA catch-weight material management with real-time inventory tracking,
+              valuation, reconciliation, and AI-driven insights
             </p>
           </div>
 
@@ -65,24 +118,24 @@ export default function HomePage() {
             <FeatureCard
               icon="🎯"
               title="Business Challenge"
-              description="Managing materials sold by weight (chicken, beef, produce) where actual weight varies from estimated weight, causing:"
+              description="Managing weight-based materials (meat, produce, commodities) where actual weight varies:"
               items={[
                 "Inventory valuation discrepancies",
                 "Margin erosion from weight variance",
-                "Reconciliation complexity",
-                "Financial reporting challenges"
+                "Complex reconciliation processes",
+                "Limited forecasting visibility"
               ]}
               gradient="from-red-500 to-red-600"
             />
             <FeatureCard
               icon="✨"
-              title="Solution Demonstrated"
-              description="Complete catch-weight material lifecycle with:"
+              title="Complete Solution"
+              description="Intelligent catch-weight lifecycle management:"
               items={[
-                "Dual-UoM tracking (cases + weight)",
+                "AI supplier performance tracking",
+                "Predictive margin erosion analysis",
                 "Real-time inventory reconstruction",
-                "Automated reconciliation",
-                "Executive analytics dashboards"
+                "Automated reconciliation & alerts"
               ]}
               gradient="from-green-500 to-green-600"
             />
@@ -93,13 +146,23 @@ export default function HomePage() {
         <section>
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Explore the Application</h2>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <NavCard
+              href="/forecasting"
+              icon="✨"
+              title="AI Insights"
+              description="Predictive analytics, supplier scoring, and smart reorder alerts"
+              badge="NEW"
+              color="purple"
+              onHover={() => setHoveredCard('forecasting')}
+              isHovered={hoveredCard === 'forecasting'}
+            />
+
             <NavCard
               href="/dashboard"
               icon="📊"
               title="Executive Dashboard"
-              description="Single-viewport overview with KPIs and charts (no scrolling)"
-              badge="START HERE"
+              description="Single-viewport KPI overview with key metrics"
               color="blue"
               onHover={() => setHoveredCard('dashboard')}
               isHovered={hoveredCard === 'dashboard'}
@@ -109,7 +172,7 @@ export default function HomePage() {
               href="/analytics"
               icon="📈"
               title="Analytics Deep Dive"
-              description="Detailed weight drift trends and margin erosion analysis"
+              description="Weight drift trends and margin erosion analysis"
               color="indigo"
               onHover={() => setHoveredCard('analytics')}
               isHovered={hoveredCard === 'analytics'}
@@ -119,8 +182,8 @@ export default function HomePage() {
               href="/materials"
               icon="📦"
               title="Materials Master"
-              description="Catch-weight material definitions with UoM conversions"
-              color="purple"
+              description="Catch-weight material definitions with UoM"
+              color="green"
               onHover={() => setHoveredCard('materials')}
               isHovered={hoveredCard === 'materials'}
             />
@@ -129,8 +192,8 @@ export default function HomePage() {
               href="/movements"
               icon="🔄"
               title="Goods Movements"
-              description="Transaction history with dual-UoM quantity tracking"
-              color="indigo"
+              description="Transaction history with dual-UoM tracking"
+              color="cyan"
               onHover={() => setHoveredCard('movements')}
               isHovered={hoveredCard === 'movements'}
             />
@@ -139,8 +202,8 @@ export default function HomePage() {
               href="/inventory"
               icon="📋"
               title="Inventory Positions"
-              description="Current stock levels by material, plant, and storage location"
-              color="green"
+              description="Stock levels by material, plant, and location"
+              color="teal"
               onHover={() => setHoveredCard('inventory')}
               isHovered={hoveredCard === 'inventory'}
             />
@@ -149,7 +212,7 @@ export default function HomePage() {
               href="/valuation"
               icon="💰"
               title="Inventory Valuation"
-              description="Financial value calculation using standard/moving average price"
+              description="Financial value with standard/moving average"
               color="amber"
               onHover={() => setHoveredCard('valuation')}
               isHovered={hoveredCard === 'valuation'}
@@ -159,7 +222,7 @@ export default function HomePage() {
               href="/reconciliation"
               icon="🔍"
               title="Reconciliation"
-              description="Balance table vs document rebuild comparison"
+              description="Balance table vs document comparison"
               color="red"
               onHover={() => setHoveredCard('reconciliation')}
               isHovered={hoveredCard === 'reconciliation'}
@@ -299,17 +362,31 @@ export default function HomePage() {
 
         {/* CTA Section */}
         <section className="text-center py-12">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-12 text-white">
-            <h2 className="text-4xl font-bold mb-4">Ready to Explore?</h2>
-            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Start with the Analytics Dashboard to see the data products in action, then explore individual transactions and reconciliation flows.
-            </p>
-            <Link
-              href="/dashboard"
-              className="inline-block px-8 py-4 bg-white text-blue-600 font-bold text-lg rounded-xl hover:bg-blue-50 transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-105"
-            >
-              View Executive Dashboard →
-            </Link>
+          <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-3xl p-12 text-white relative overflow-hidden">
+            <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:32px_32px]"></div>
+            <div className="relative">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold mb-4">
+                <span>✨</span> AI-Powered Analytics
+              </div>
+              <h2 className="text-4xl font-bold mb-4">Ready to See the Intelligence in Action?</h2>
+              <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+                Experience AI-driven supplier performance analysis, predictive margin forecasting, and intelligent reorder recommendations
+              </p>
+              <div className="flex items-center justify-center gap-4">
+                <Link
+                  href="/forecasting"
+                  className="inline-block px-8 py-4 bg-white text-indigo-600 font-bold text-lg rounded-xl hover:bg-blue-50 transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-105"
+                >
+                  ✨ View AI Insights →
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="inline-block px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white font-bold text-lg rounded-xl hover:bg-white/20 transition-all duration-200"
+                >
+                  📊 Executive Dashboard
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -356,6 +433,27 @@ function FeatureCard({ icon, title, description, items, gradient }: {
   );
 }
 
+// Component: AI Feature Card - NEW!
+function AIFeatureCard({ icon, title, description, badge }: {
+  icon: string;
+  title: string;
+  description: string;
+  badge: string;
+}) {
+  return (
+    <div className="relative bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-6 shadow-lg border-2 border-purple-200 hover:shadow-xl transition-all duration-300 hover:scale-105">
+      <div className="absolute -top-2 -right-2 px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded-full shadow-lg">
+        {badge}
+      </div>
+      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center text-2xl mb-4 shadow-md">
+        {icon}
+      </div>
+      <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>
+      <p className="text-sm text-gray-600">{description}</p>
+    </div>
+  );
+}
+
 // Component: Navigation Card
 function NavCard({ href, icon, title, description, badge, color, onHover, isHovered }: {
   href: string;
@@ -372,6 +470,8 @@ function NavCard({ href, icon, title, description, badge, color, onHover, isHove
     purple: 'from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700',
     indigo: 'from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700',
     green: 'from-green-500 to-green-600 hover:from-green-600 hover:to-green-700',
+    cyan: 'from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700',
+    teal: 'from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700',
     amber: 'from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700',
     red: 'from-red-500 to-red-600 hover:from-red-600 hover:to-red-700',
   }[color];
