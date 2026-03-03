@@ -6,12 +6,14 @@ import { usePathname } from "next/navigation";
 const links = [
   { href: "/", label: "🏠 Overview" },
   { href: "/analytics", label: "📊 Analytics" },
+  { href: "/forecasting", label: "🔮 Forecasting" },
   { href: "/materials", label: "Materials" },
   { href: "/movements", label: "Goods Movement" },
   { href: "/inventory", label: "Inventory" },
   { href: "/valuation", label: "Valuation" },
   { href: "/reconciliation", label: "Reconciliation" },
   { href: "/back-postings", label: "Back-Postings" },
+  { href: "/admin", label: "⚙️ Admin" },
 ];
 
 export default function Nav() {

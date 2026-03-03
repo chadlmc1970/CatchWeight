@@ -8,7 +8,7 @@ import os
 import psycopg
 import traceback
 
-from catchweight.api.v1 import materials, movements, stock, valuation, reconciliation, seed, dataproducts
+from catchweight.api.v1 import materials, movements, stock, valuation, reconciliation, seed, dataproducts, admin, forecasting
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +45,8 @@ app.include_router(valuation.router, prefix="/v1")
 app.include_router(reconciliation.router, prefix="/v1")
 app.include_router(seed.router, prefix="/v1")
 app.include_router(dataproducts.router, prefix="/v1")
+app.include_router(admin.router, prefix="/v1")
+app.include_router(forecasting.router, prefix="/v1")
 
 
 @app.get("/health")
