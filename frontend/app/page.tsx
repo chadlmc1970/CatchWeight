@@ -320,46 +320,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Technical Architecture */}
-        <section className="bg-white rounded-3xl p-10 shadow-xl border-2 border-gray-200">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Technical Architecture</h2>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <TechStack
-              layer="Data Layer"
-              icon="🗄️"
-              technologies={[
-                "PostgreSQL (SAP HANA equivalent)",
-                "5 Core SAP Tables",
-                "3 Analytical Views",
-                "Dual-UoM Support"
-              ]}
-            />
-
-            <TechStack
-              layer="API Layer"
-              icon="⚡"
-              technologies={[
-                "FastAPI (Python)",
-                "REST Endpoints",
-                "Real-time Queries",
-                "Auto-generated Docs"
-              ]}
-            />
-
-            <TechStack
-              layer="UI Layer"
-              icon="🎨"
-              technologies={[
-                "Next.js + React",
-                "Recharts Visualizations",
-                "SAC-inspired Design",
-                "Responsive Layout"
-              ]}
-            />
-          </div>
-        </section>
-
         {/* CTA Section */}
         <section className="text-center py-12">
           <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-3xl p-12 text-white relative overflow-hidden">
@@ -512,23 +472,6 @@ function BDCStep({ step, title, items }: { step: string; title: string; items: s
           <li key={idx} className="flex items-start gap-2 text-sm text-slate-300">
             <span className="text-blue-400 mt-0.5">•</span>
             {item}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-// Component: Tech Stack
-function TechStack({ layer, icon, technologies }: { layer: string; icon: string; technologies: string[] }) {
-  return (
-    <div className="text-center">
-      <div className="text-4xl mb-3">{icon}</div>
-      <h3 className="text-xl font-bold text-gray-900 mb-4">{layer}</h3>
-      <ul className="space-y-2">
-        {technologies.map((tech, idx) => (
-          <li key={idx} className="text-sm text-gray-600 bg-gray-50 rounded-lg py-2 px-3">
-            {tech}
           </li>
         ))}
       </ul>
