@@ -52,13 +52,15 @@ interface ForecastingSummary {
   total_suppliers: number;
   worst_reliability_score: number;
   best_reliability_score: number;
-  avg_reliability_score: number;
+  avg_reliability: number;
   total_materials_tracked: number;
   critical_alerts: number;
   warning_alerts: number;
   next_reorder_in_days: number | null;
   avg_daily_erosion: number;
   total_erosion_90days: number;
+  high_risk_suppliers: number;
+  total_exposure: number;
 }
 
 export default function ForecastingPage() {
@@ -147,12 +149,12 @@ export default function ForecastingPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <CompactKPICard
             icon="🎯"
-            value={`${summary?.avg_reliability_score.toFixed(1)}%`}
+            value={`${(summary?.avg_reliability || 0).toFixed(1)}%`}
             label="Avg Supplier Reliability"
             status={
-              (summary?.avg_reliability_score || 0) > 90
+              (summary?.avg_reliability || 0) > 90
                 ? 'success'
-                : (summary?.avg_reliability_score || 0) > 70
+                : (summary?.avg_reliability || 0) > 70
                 ? 'warning'
                 : 'danger'
             }
