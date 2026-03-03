@@ -72,7 +72,7 @@ def get_db():
 
 
 @router.get("/dataproducts/weight-drift", response_model=List[WeightDriftRecord])
-def get_weight_drift(limit: int = 100, offset: int = 0):
+def get_weight_drift(limit: int = 10000, offset: int = 0):
     """
     Get Weight Drift Trend data product.
     Tracks weight variance from baseline (expected vs actual).
@@ -158,7 +158,7 @@ def get_weight_drift_summary():
 
 
 @router.get("/dataproducts/margin-erosion", response_model=List[MarginErosionRecord])
-def get_margin_erosion(limit: int = 100, offset: int = 0):
+def get_margin_erosion(limit: int = 10000, offset: int = 0):
     """
     Get Margin Erosion data product.
     Tracks margin loss due to catch weight variance.
