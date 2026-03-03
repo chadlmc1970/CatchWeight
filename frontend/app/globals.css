@@ -5,6 +5,30 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Dashboard CSS Variables */
+:root {
+  /* Chart Heights */
+  --chart-height-compact: 200px;
+  --chart-height-comfortable: 300px;
+
+  /* KPI Card Heights */
+  --kpi-height-compact: 80px;
+  --kpi-height-comfortable: 120px;
+
+  /* Dashboard Spacing */
+  --dashboard-gap-compact: 1rem;
+  --dashboard-gap-comfortable: 1.5rem;
+
+  /* Filter Panel */
+  --filter-panel-width-open: 280px;
+  --filter-panel-width-collapsed: 48px;
+
+  /* Dashboard Colors */
+  --dashboard-bg: #f8fafc;
+  --dashboard-card-bg: #ffffff;
+  --dashboard-border: #e2e8f0;
+}
+
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
