@@ -49,7 +49,6 @@ export default function AnalyticsPage() {
   const [marginErosionByMaterial, setMarginErosionByMaterial] = useState<MaterialMetric[]>([]);
   const [weightDriftRecords, setWeightDriftRecords] = useState<WeightDriftRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [density, setDensity] = useState<'compact' | 'comfortable'>('compact');
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
 
   useEffect(() => {
@@ -90,7 +89,7 @@ export default function AnalyticsPage() {
     );
   }
 
-  const chartHeight = density === 'compact' ? 'compact' : 'comfortable';
+  const chartHeight = 'compact';
 
   // Prepare chart data
   const chartTrendData = weightDriftRecords.reverse().map(r => ({
@@ -168,20 +167,12 @@ export default function AnalyticsPage() {
       <div className="bg-white border-b border-slate-200 p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-slate-900">Analytics Deep Dive</h1>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setDensity(density === 'compact' ? 'comfortable' : 'compact')}
-              className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-            >
-              {density === 'compact' ? '📏 Compact' : '📐 Comfortable'}
-            </button>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-            >
-              🔄 Refresh
-            </button>
-          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+          >
+            🔄 Refresh
+          </button>
         </div>
 
         {/* Compact KPIs */}
