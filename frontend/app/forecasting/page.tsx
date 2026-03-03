@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import {
-  ScatterChart,
-  Scatter,
   AreaChart,
   Area,
   BarChart,
@@ -13,7 +11,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell,
   Legend
 } from 'recharts';
 import { apiFetch } from '@/lib/api';
@@ -233,62 +230,48 @@ export default function ForecastingPage() {
         {/* Supplier Reliability Chart */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
           <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
-            🎯 Supplier Reliability Scores
-            <InfoIcon explanation="This scatter chart plots each supplier's average weight drift percentage against their reliability score. The reliability score (0-100%) is calculated using statistical analysis of historical receipt patterns, including drift consistency and volatility. Green dots indicate highly reliable suppliers (>90%), yellow shows moderate reliability (70-90%), and red indicates high-risk suppliers (<70%). Use this to identify which suppliers consistently deliver accurate weights." />
+            🎯 Supplier Reliability - Top 10 Risk Areas
+            <InfoIcon explanation="This horizontal bar chart shows the 10 suppliers with the lowest reliability scores, sorted from worst to best. The reliability score (0-100%) is calculated using statistical analysis of historical receipt patterns, including drift consistency and volatility. Red bars (<70%) indicate high-risk suppliers requiring immediate attention, yellow (70-90%) shows moderate reliability, and green (>90%) indicates reliable suppliers. Focus on the red and yellow bars for contract renegotiation or supplier improvement initiatives." />
           </h2>
           <p className="text-sm text-slate-600 mb-6">
-            Weight drift vs. reliability score. Green = highly reliable, Yellow = moderate, Red = risky.
+            Focus on worst performers - sorted by reliability score (lower is worse)
           </p>
 
-          <ResponsiveContainer width="100%" height={400}>
-            <ScatterChart margin={{ top: 20, right: 20, bottom: 60, left: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                type="number"
-                dataKey="avg_drift_pct"
-                name="Avg Drift %"
-                label={{ value: 'Avg Weight Drift %', position: 'bottom', offset: 40 }}
-              />
-              <YAxis
-                type="number"
-                dataKey="reliability_score"
-                name="Reliability Score"
-                label={{ value: 'Reliability Score', angle: -90, position: 'insideLeft' }}
-              />
-              <Tooltip
-                cursor={{ strokeDasharray: '3 3' }}
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const data = payload[0].payload as SupplierPerformance;
-                    return (
-                      <div className="bg-white p-4 border rounded shadow-lg">
-                        <p className="font-semibold">{data.material_id} - {data.supplier_code}</p>
-                        <p className="text-sm">Reliability: {data.reliability_score.toFixed(1)}%</p>
-                        <p className="text-sm">Avg Drift: {data.avg_drift_pct.toFixed(2)}%</p>
-                        <p className="text-sm">Volatility: ±{data.drift_volatility.toFixed(2)}%</p>
-                        <p className="text-sm">Exposure: ${data.financial_exposure.toFixed(0)}</p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-              <Scatter name="Suppliers" data={supplierPerformance}>
-                {supplierPerformance.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={
-                      entry.reliability_score > 90
-                        ? '#10B981'
-                        : entry.reliability_score > 70
-                        ? '#F59E0B'
-                        : '#EF4444'
-                    }
-                  />
-                ))}
-              </Scatter>
-            </ScatterChart>
-          </ResponsiveContainer>
+          <div className="space-y-3">
+            {sortedByReliability.slice(0, 10).map((supplier, idx) => (
+              <div key={`${supplier.material_id}-${supplier.supplier_code}`} className="flex items-center gap-4">
+                <div className="w-8 text-right text-xs text-slate-500 font-mono">#{idx + 1}</div>
+                <div className="w-32 text-sm font-medium text-slate-900 truncate">
+                  {supplier.supplier_code}
+                </div>
+                <div className="w-24 text-xs text-slate-600 font-mono truncate">
+                  {supplier.material_id}
+                </div>
+                <div className="flex-1">
+                  <div className="relative h-8 bg-slate-100 rounded overflow-hidden">
+                    <div
+                      className={`h-full flex items-center justify-end px-3 text-xs font-semibold transition-all ${
+                        supplier.reliability_score > 90
+                          ? 'bg-green-500 text-white'
+                          : supplier.reliability_score > 70
+                          ? 'bg-yellow-500 text-white'
+                          : 'bg-red-500 text-white'
+                      }`}
+                      style={{ width: `${supplier.reliability_score}%` }}
+                    >
+                      {supplier.reliability_score.toFixed(1)}%
+                    </div>
+                  </div>
+                </div>
+                <div className="w-20 text-right text-xs text-slate-600">
+                  {supplier.avg_drift_pct > 0 ? '+' : ''}{supplier.avg_drift_pct.toFixed(2)}% drift
+                </div>
+                <div className="w-24 text-right text-xs text-slate-600">
+                  ${(supplier.financial_exposure / 1000).toFixed(1)}k
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Weight Variance Predictions Table */}
