@@ -95,12 +95,22 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <NavCard
-              href="/analytics"
+              href="/dashboard"
               icon="📊"
-              title="Analytics Dashboard"
-              description="Executive view of weight drift trends and margin erosion analysis"
+              title="Executive Dashboard"
+              description="Single-viewport overview with KPIs and charts (no scrolling)"
               badge="START HERE"
               color="blue"
+              onHover={() => setHoveredCard('dashboard')}
+              isHovered={hoveredCard === 'dashboard'}
+            />
+
+            <NavCard
+              href="/analytics"
+              icon="📈"
+              title="Analytics Deep Dive"
+              description="Detailed weight drift trends and margin erosion analysis"
+              color="indigo"
               onHover={() => setHoveredCard('analytics')}
               isHovered={hoveredCard === 'analytics'}
             />
@@ -295,10 +305,10 @@ export default function HomePage() {
               Start with the Analytics Dashboard to see the data products in action, then explore individual transactions and reconciliation flows.
             </p>
             <Link
-              href="/analytics"
+              href="/dashboard"
               className="inline-block px-8 py-4 bg-white text-blue-600 font-bold text-lg rounded-xl hover:bg-blue-50 transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-105"
             >
-              View Analytics Dashboard →
+              View Executive Dashboard →
             </Link>
           </div>
         </section>

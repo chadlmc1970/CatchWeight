@@ -13,7 +13,8 @@ const DensityToggle = dynamic(
 
 const links = [
   { href: "/", label: "🏠 Overview" },
-  { href: "/analytics", label: "📊 Analytics" },
+  { href: "/dashboard", label: "📊 Dashboard" },
+  { href: "/analytics", label: "Analytics" },
   { href: "/forecasting", label: "✨ AI Insights" },
   { href: "/materials", label: "Materials" },
   { href: "/movements", label: "Goods Movement" },
