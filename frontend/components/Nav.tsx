@@ -3,13 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import dynamic from "next/dynamic";
-
-// Dynamically import DensityToggle to avoid SSR issues
-const DensityToggle = dynamic(
-  () => import("./dashboard/DensityToggle"),
-  { ssr: false }
-);
 
 const links = [
   { href: "/", label: "🏠 Overview" },
@@ -28,7 +21,6 @@ export default function Nav() {
   const pathname = usePathname();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [density, setDensity] = useState<"compact" | "comfortable">("compact");
 
   const handleReloadData = async () => {
     setLoading(true);
@@ -70,7 +62,6 @@ export default function Nav() {
         </Link>
       ))}
       <div className="ml-auto flex items-center gap-3">
-        <DensityToggle value={density} onChange={setDensity} />
         <Link
           href="/admin"
           className={`text-sm hover:text-blue-300 transition-colors ${
