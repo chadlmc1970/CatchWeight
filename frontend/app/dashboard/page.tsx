@@ -162,10 +162,10 @@ export default function ExecutiveDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <CompactKPICard
             icon="⚖️"
-            value={`${weightDriftSummary?.avg_drift_pct.toFixed(2)}%`}
+            value={`${(weightDriftSummary?.avg_drift_pct || 0).toFixed(2)}%`}
             label="Avg Weight Drift"
             trend={{
-              direction: weightDriftSummary?.avg_drift_pct > 0 ? 'up' : 'down',
+              direction: (weightDriftSummary?.avg_drift_pct || 0) > 0 ? 'up' : 'down',
               value: `${Math.abs(weightDriftSummary?.avg_drift_pct || 0).toFixed(2)}%`,
             }}
             status={
