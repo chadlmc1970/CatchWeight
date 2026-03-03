@@ -8,13 +8,13 @@ const links = [
   { href: "/", label: "🏠 Overview" },
   { href: "/analytics", label: "📊 Analytics" },
   { href: "/forecasting", label: "✨ AI Insights" },
+  { href: "/schema", label: "🗄️ Schema" },
   { href: "/materials", label: "Materials" },
   { href: "/movements", label: "Goods Movement" },
   { href: "/inventory", label: "Inventory" },
   { href: "/valuation", label: "Valuation" },
   { href: "/reconciliation", label: "Reconciliation" },
   { href: "/back-postings", label: "Back-Postings" },
-  { href: "/admin", label: "⚙️ Admin" },
 ];
 
 export default function Nav() {
@@ -62,6 +62,14 @@ export default function Nav() {
         </Link>
       ))}
       <div className="ml-auto flex items-center gap-3">
+        <Link
+          href="/admin"
+          className={`text-sm hover:text-blue-300 transition-colors ${
+            pathname === "/admin" ? "text-blue-400 font-semibold" : "text-slate-300"
+          }`}
+        >
+          ⚙️ Admin
+        </Link>
         {message && (
           <span className="text-xs bg-slate-800 px-3 py-1 rounded">
             {message}
