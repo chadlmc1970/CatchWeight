@@ -311,7 +311,7 @@ export default function AnalyticsPage() {
 
           {/* Tab 2: Margin Erosion */}
           <Tabs.Content value="margin">
-            <DashboardGrid cols={2} rows={2} gap={4}>
+            <DashboardGrid cols={3} rows={1} gap={4}>
               <GridCell>
                 <ChartCard
                   title="Erosion Trend"
