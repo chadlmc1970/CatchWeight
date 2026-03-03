@@ -193,7 +193,7 @@ export default function ExecutiveDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <CompactKPICard
             icon="🎯"
-            value={`${forecastingSummary?.avg_reliability.toFixed(1)}%`}
+            value={`${(forecastingSummary?.avg_reliability || 0).toFixed(1)}%`}
             label="Avg Supplier Reliability"
             status={
               (forecastingSummary?.avg_reliability || 0) > 90
