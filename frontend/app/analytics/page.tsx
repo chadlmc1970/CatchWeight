@@ -230,7 +230,7 @@ export default function DataProductsPage() {
                       borderRadius: '12px',
                       boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
                     }}
-                    formatter={(value: number) => [`${value.toFixed(2)}%`, 'Drift']}
+                    formatter={(value: number | undefined) => value ? [`${value.toFixed(2)}%`, 'Drift'] : ['0.00%', 'Drift']}
                   />
                   <Area
                     type="monotone"
@@ -261,7 +261,7 @@ export default function DataProductsPage() {
                       borderRadius: '12px',
                       boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
                     }}
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Exposure']}
+                    formatter={(value: number | undefined) => value ? [`$${value.toLocaleString()}`, 'Exposure'] : ['$0', 'Exposure']}
                   />
                   <Bar dataKey="exposure" radius={[0, 8, 8, 0]}>
                     {topMaterialsChart.map((entry, index) => (
@@ -344,7 +344,7 @@ export default function DataProductsPage() {
                       borderRadius: '12px',
                       boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
                     }}
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Erosion']}
+                    formatter={(value: number | undefined) => value ? [`$${value.toLocaleString()}`, 'Erosion'] : ['$0', 'Erosion']}
                   />
                 </PieChart>
               </ResponsiveContainer>
