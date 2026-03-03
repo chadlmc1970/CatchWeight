@@ -102,38 +102,37 @@ export default function InventoryPage() {
       {/* Inventory Table */}
       <ChartCard
         title={showBatches ? "Inventory by Batch" : "Inventory by Storage Location"}
+        height="auto"
         infoText={showBatches
           ? "Batch-level stock quantities showing detailed inventory tracking for catch-weight materials."
           : "Current stock positions aggregated by storage location. Shows dual-UoM quantities (cases and pounds)."
         }
       >
-        <div className="overflow-x-auto">
-          {!showBatches ? (
-            <DataTable
-              columns={[
-                { key: "material_id", header: "Material", render: (r: StockPosition) => <span className="font-semibold text-slate-900">{r.material_id}</span> },
-                { key: "plant_id", header: "Plant", render: (r: StockPosition) => <span className="text-slate-700">{r.plant_id}</span> },
-                { key: "storage_location", header: "Storage Location", render: (r: StockPosition) => <span className="text-slate-700">{r.storage_location}</span> },
-                { key: "stock_base_uom", header: "Cases", render: (r: StockPosition) => <span className="font-mono text-right block text-slate-900">{r.stock_base_uom.toLocaleString()}</span> },
-                { key: "stock_parallel_uom", header: "Pounds", render: (r: StockPosition) => <span className="font-mono text-right block text-slate-900">{r.stock_parallel_uom.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> },
-                { key: "last_updated", header: "Last Updated", render: (r: StockPosition) => <span className="text-sm text-slate-500">{r.last_updated?.slice(0, 10)}</span> },
-              ]}
-              data={stock}
-            />
-          ) : (
-            <DataTable
-              columns={[
-                { key: "material_id", header: "Material", render: (r: BatchStock) => <span className="font-semibold text-slate-900">{r.material_id}</span> },
-                { key: "plant_id", header: "Plant", render: (r: BatchStock) => <span className="text-slate-700">{r.plant_id}</span> },
-                { key: "storage_location", header: "SLoc", render: (r: BatchStock) => <span className="text-slate-700">{r.storage_location}</span> },
-                { key: "batch_id", header: "Batch", render: (r: BatchStock) => <span className="font-semibold text-blue-600">{r.batch_id}</span> },
-                { key: "stock_base_uom", header: "Cases", render: (r: BatchStock) => <span className="font-mono text-right block text-slate-900">{r.stock_base_uom.toLocaleString()}</span> },
-                { key: "stock_parallel_uom", header: "Pounds", render: (r: BatchStock) => <span className="font-mono text-right block text-slate-900">{r.stock_parallel_uom.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> },
-              ]}
-              data={batches}
-            />
-          )}
-        </div>
+        {!showBatches ? (
+          <DataTable
+            columns={[
+              { key: "material_id", header: "Material", render: (r: StockPosition) => <span className="font-semibold text-slate-900">{r.material_id}</span> },
+              { key: "plant_id", header: "Plant", render: (r: StockPosition) => <span className="text-slate-700">{r.plant_id}</span> },
+              { key: "storage_location", header: "Storage Location", render: (r: StockPosition) => <span className="text-slate-700">{r.storage_location}</span> },
+              { key: "stock_base_uom", header: "Cases", render: (r: StockPosition) => <span className="font-mono text-right block text-slate-900">{r.stock_base_uom.toLocaleString()}</span> },
+              { key: "stock_parallel_uom", header: "Pounds", render: (r: StockPosition) => <span className="font-mono text-right block text-slate-900">{r.stock_parallel_uom.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> },
+              { key: "last_updated", header: "Last Updated", render: (r: StockPosition) => <span className="text-sm text-slate-500">{r.last_updated?.slice(0, 10)}</span> },
+            ]}
+            data={stock}
+          />
+        ) : (
+          <DataTable
+            columns={[
+              { key: "material_id", header: "Material", render: (r: BatchStock) => <span className="font-semibold text-slate-900">{r.material_id}</span> },
+              { key: "plant_id", header: "Plant", render: (r: BatchStock) => <span className="text-slate-700">{r.plant_id}</span> },
+              { key: "storage_location", header: "SLoc", render: (r: BatchStock) => <span className="text-slate-700">{r.storage_location}</span> },
+              { key: "batch_id", header: "Batch", render: (r: BatchStock) => <span className="font-semibold text-blue-600">{r.batch_id}</span> },
+              { key: "stock_base_uom", header: "Cases", render: (r: BatchStock) => <span className="font-mono text-right block text-slate-900">{r.stock_base_uom.toLocaleString()}</span> },
+              { key: "stock_parallel_uom", header: "Pounds", render: (r: BatchStock) => <span className="font-mono text-right block text-slate-900">{r.stock_parallel_uom.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> },
+            ]}
+            data={batches}
+          />
+        )}
       </ChartCard>
     </div>
   );
