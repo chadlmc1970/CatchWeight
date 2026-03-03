@@ -108,7 +108,7 @@ export default function ForecastingPage() {
 
   const chartHeight = density === 'compact' ? 'compact' : 'comfortable';
 
-  // Prepare chart data
+  // Prepare chart data - WORST performers = lowest reliability scores (ascending sort)
   const sortedByReliability = [...supplierPerformance].sort(
     (a, b) => a.reliability_score - b.reliability_score
   );
@@ -252,7 +252,6 @@ export default function ForecastingPage() {
                     stroke="#ef4444"
                     fill="#fca5a5"
                     strokeWidth={2}
-                    strokeDasharray={(entry: any) => entry && entry.type === 'forecast' ? '5 5' : '0'}
                   />
                 </AreaChart>
               </ResponsiveContainer>
