@@ -311,8 +311,9 @@ export default function AnalyticsPage() {
 
           {/* Tab 2: Margin Erosion */}
           <Tabs.Content value="margin">
-            <DashboardGrid cols={3} rows={1} gap={4}>
-              <GridCell>
+            <div className="space-y-4">
+              {/* Top Row: 3 charts */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <ChartCard
                   title="Erosion Trend"
                   height={chartHeight}
@@ -328,9 +329,7 @@ export default function AnalyticsPage() {
                     </AreaChart>
                   </ResponsiveContainer>
                 </ChartCard>
-              </GridCell>
 
-              <GridCell>
                 <ChartCard
                   title="Top Erosion Materials"
                   height={chartHeight}
@@ -346,9 +345,7 @@ export default function AnalyticsPage() {
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartCard>
-              </GridCell>
 
-              <GridCell>
                 <ChartCard
                   title="Erosion Distribution"
                   height={chartHeight}
@@ -373,37 +370,30 @@ export default function AnalyticsPage() {
                     </PieChart>
                   </ResponsiveContainer>
                 </ChartCard>
-              </GridCell>
+              </div>
 
-              <GridCell>
-                <ChartCard
-                  title="Monthly Summary"
-                  height={chartHeight}
-                  infoText="Key statistics for margin erosion impact. Shows expected vs actual margins and total loss."
-                >
-                  <div className="h-full flex flex-col justify-center space-y-4 px-4">
-                    <div className="bg-slate-50 rounded-lg p-4">
-                      <div className="text-sm text-slate-600">Total Erosion</div>
-                      <div className="text-3xl font-bold text-red-600">
-                        ${Math.abs(marginErosionSummary?.total_erosion || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                      </div>
-                    </div>
-                    <div className="bg-slate-50 rounded-lg p-4">
-                      <div className="text-sm text-slate-600">Affected Materials</div>
-                      <div className="text-2xl font-bold text-slate-900">
-                        {marginErosionSummary?.affected_materials || 0}
-                      </div>
-                    </div>
-                    <div className="bg-slate-50 rounded-lg p-4">
-                      <div className="text-sm text-slate-600">Avg Erosion %</div>
-                      <div className="text-2xl font-bold text-slate-900">
-                        {(marginErosionSummary?.avg_erosion_pct || 0).toFixed(2)}%
-                      </div>
-                    </div>
-                  </div>
-                </ChartCard>
-              </GridCell>
-            </DashboardGrid>
+              {/* Bottom Row: Summary Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <CompactKPICard
+                  icon="💰"
+                  value={`$${Math.abs(marginErosionSummary?.total_erosion || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+                  label="Total Erosion"
+                  status="danger"
+                />
+                <CompactKPICard
+                  icon="📦"
+                  value={marginErosionSummary?.affected_materials || 0}
+                  label="Affected Materials"
+                  status="warning"
+                />
+                <CompactKPICard
+                  icon="📉"
+                  value={`${(marginErosionSummary?.avg_erosion_pct || 0).toFixed(2)}%`}
+                  label="Avg Erosion %"
+                  status="warning"
+                />
+              </div>
+            </div>
           </Tabs.Content>
 
           {/* Tab 3: Material Performance */}
