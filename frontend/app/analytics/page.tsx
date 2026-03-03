@@ -7,20 +7,18 @@ import * as Tabs from '@radix-ui/react-tabs';
 import { DashboardGrid, GridCell, ChartCard, CompactKPICard } from '@/components/dashboard';
 
 interface WeightDriftSummary {
-  total_transactions: number;
-  total_drift_lb: number;
+  total_receipts: number;
+  total_drift_kg: number;
   avg_drift_pct: number;
-  total_financial_exposure: number;
+  total_cost_impact: number;
   max_drift_pct: number;
   min_drift_pct: number;
 }
 
 interface MarginErosionSummary {
-  total_transactions: number;
-  total_margin_erosion: number;
+  total_erosion: number;
   avg_erosion_pct: number;
-  total_expected_margin: number;
-  total_actual_margin: number;
+  affected_materials: number;
 }
 
 interface MaterialMetric {
@@ -190,19 +188,19 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <CompactKPICard
             icon="📈"
-            value={(weightDriftSummary?.total_transactions || 0).toLocaleString()}
+            value={(weightDriftSummary?.total_receipts || 0).toLocaleString()}
             label="Total Transactions"
             status="neutral"
           />
           <CompactKPICard
             icon="⚖️"
-            value={`$${Math.abs(weightDriftSummary?.total_financial_exposure || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+            value={`$${Math.abs(weightDriftSummary?.total_cost_impact || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
             label="Weight Drift Impact"
             status="warning"
           />
           <CompactKPICard
             icon="📉"
-            value={`$${Math.abs(marginErosionSummary?.total_margin_erosion || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+            value={`$${Math.abs(marginErosionSummary?.total_erosion || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
             label="Margin Erosion"
             status="danger"
           />
@@ -396,19 +394,19 @@ export default function AnalyticsPage() {
                     <div className="bg-slate-50 rounded-lg p-4">
                       <div className="text-sm text-slate-600">Total Erosion</div>
                       <div className="text-3xl font-bold text-red-600">
-                        ${Math.abs(marginErosionSummary?.total_margin_erosion || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                        ${Math.abs(marginErosionSummary?.total_erosion || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                       </div>
                     </div>
                     <div className="bg-slate-50 rounded-lg p-4">
-                      <div className="text-sm text-slate-600">Expected Margin</div>
+                      <div className="text-sm text-slate-600">Affected Materials</div>
                       <div className="text-2xl font-bold text-slate-900">
-                        ${Math.abs(marginErosionSummary?.total_expected_margin || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                        {marginErosionSummary?.affected_materials || 0}
                       </div>
                     </div>
                     <div className="bg-slate-50 rounded-lg p-4">
-                      <div className="text-sm text-slate-600">Actual Margin</div>
+                      <div className="text-sm text-slate-600">Avg Erosion %</div>
                       <div className="text-2xl font-bold text-slate-900">
-                        ${Math.abs(marginErosionSummary?.total_actual_margin || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                        {(marginErosionSummary?.avg_erosion_pct || 0).toFixed(2)}%
                       </div>
                     </div>
                   </div>
