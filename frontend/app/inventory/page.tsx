@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
 import DataTable from "@/components/DataTable";
+import { CompactKPICard, ChartCard } from "@/components/dashboard";
 
 interface StockPosition {
   material_id: string;
@@ -41,66 +42,99 @@ export default function InventoryPage() {
       .catch((e) => setError(e.message));
   }, []);
 
-  if (error) return <p className="text-red-600">Error: {error}</p>;
+  if (error) return <p className="text-red-600 p-6">Error: {error}</p>;
 
   const totalBase = stock.reduce((sum, s) => sum + s.stock_base_uom, 0);
   const totalParallel = stock.reduce((sum, s) => sum + s.stock_parallel_uom, 0);
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Inventory</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
-          <p className="text-sm text-slate-500 mb-1">Total Stock (Cases)</p>
-          <p className="text-2xl font-bold">{totalBase.toLocaleString()}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
-          <p className="text-sm text-slate-500 mb-1">Total Stock (Pounds)</p>
-          <p className="text-2xl font-bold">{totalParallel.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
-          <p className="text-sm text-slate-500 mb-1">Positions</p>
-          <p className="text-2xl font-bold">{stock.length}</p>
-        </div>
+    <div className="min-h-screen bg-slate-50 p-6 space-y-4">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-3xl font-bold text-slate-900">📋 Inventory Positions</h1>
       </div>
 
-      <div className="flex gap-3 mb-4">
-        <button onClick={() => setShowBatches(false)} className={`px-4 py-1.5 rounded text-sm font-medium ${!showBatches ? "bg-slate-900 text-white" : "bg-slate-200 text-slate-700"}`}>
-          By Storage Location
+      {/* Compact KPIs */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CompactKPICard
+          icon="📦"
+          value={totalBase.toLocaleString()}
+          label="Total Stock (Cases)"
+          status="neutral"
+        />
+        <CompactKPICard
+          icon="⚖️"
+          value={`${totalParallel.toLocaleString("en-US", { maximumFractionDigits: 0 })} lb`}
+          label="Total Stock (Pounds)"
+          status="neutral"
+        />
+        <CompactKPICard
+          icon="📍"
+          value={stock.length}
+          label="Storage Positions"
+          status="neutral"
+        />
+      </div>
+
+      {/* Toggle Buttons */}
+      <div className="flex gap-3">
+        <button
+          onClick={() => setShowBatches(false)}
+          className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
+            !showBatches
+              ? "bg-blue-600 text-white shadow-md"
+              : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+          }`}
+        >
+          By Storage Location ({stock.length})
         </button>
-        <button onClick={() => setShowBatches(true)} className={`px-4 py-1.5 rounded text-sm font-medium ${showBatches ? "bg-slate-900 text-white" : "bg-slate-200 text-slate-700"}`}>
-          By Batch
+        <button
+          onClick={() => setShowBatches(true)}
+          className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
+            showBatches
+              ? "bg-blue-600 text-white shadow-md"
+              : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+          }`}
+        >
+          By Batch ({batches.length})
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200">
-        {!showBatches ? (
-          <DataTable
-            columns={[
-              { key: "material_id", header: "Material" },
-              { key: "plant_id", header: "Plant" },
-              { key: "storage_location", header: "SLoc" },
-              { key: "stock_base_uom", header: "Cases", render: (r: StockPosition) => r.stock_base_uom.toLocaleString() },
-              { key: "stock_parallel_uom", header: "Pounds", render: (r: StockPosition) => r.stock_parallel_uom.toLocaleString("en-US", { minimumFractionDigits: 2 }) },
-              { key: "last_updated", header: "Last Updated", render: (r: StockPosition) => r.last_updated?.slice(0, 19) },
-            ]}
-            data={stock}
-          />
-        ) : (
-          <DataTable
-            columns={[
-              { key: "material_id", header: "Material" },
-              { key: "plant_id", header: "Plant" },
-              { key: "storage_location", header: "SLoc" },
-              { key: "batch_id", header: "Batch" },
-              { key: "stock_base_uom", header: "Cases", render: (r: BatchStock) => r.stock_base_uom.toLocaleString() },
-              { key: "stock_parallel_uom", header: "Pounds", render: (r: BatchStock) => r.stock_parallel_uom.toLocaleString("en-US", { minimumFractionDigits: 2 }) },
-            ]}
-            data={batches}
-          />
-        )}
-      </div>
+      {/* Inventory Table */}
+      <ChartCard
+        title={showBatches ? "Inventory by Batch" : "Inventory by Storage Location"}
+        infoText={showBatches
+          ? "Batch-level stock quantities showing detailed inventory tracking for catch-weight materials."
+          : "Current stock positions aggregated by storage location. Shows dual-UoM quantities (cases and pounds)."
+        }
+      >
+        <div className="overflow-x-auto">
+          {!showBatches ? (
+            <DataTable
+              columns={[
+                { key: "material_id", header: "Material", render: (r: StockPosition) => <span className="font-medium">{r.material_id}</span> },
+                { key: "plant_id", header: "Plant" },
+                { key: "storage_location", header: "Storage Location" },
+                { key: "stock_base_uom", header: "Cases", render: (r: StockPosition) => <span className="font-mono">{r.stock_base_uom.toLocaleString()}</span> },
+                { key: "stock_parallel_uom", header: "Pounds", render: (r: StockPosition) => <span className="font-mono">{r.stock_parallel_uom.toLocaleString("en-US", { maximumFractionDigits: 2 })}</span> },
+                { key: "last_updated", header: "Last Updated", render: (r: StockPosition) => <span className="text-sm text-slate-600">{r.last_updated?.slice(0, 19).replace('T', ' ')}</span> },
+              ]}
+              data={stock}
+            />
+          ) : (
+            <DataTable
+              columns={[
+                { key: "material_id", header: "Material", render: (r: BatchStock) => <span className="font-medium">{r.material_id}</span> },
+                { key: "plant_id", header: "Plant" },
+                { key: "storage_location", header: "SLoc" },
+                { key: "batch_id", header: "Batch", render: (r: BatchStock) => <span className="font-medium text-blue-600">{r.batch_id}</span> },
+                { key: "stock_base_uom", header: "Cases", render: (r: BatchStock) => <span className="font-mono">{r.stock_base_uom.toLocaleString()}</span> },
+                { key: "stock_parallel_uom", header: "Pounds", render: (r: BatchStock) => <span className="font-mono">{r.stock_parallel_uom.toLocaleString("en-US", { maximumFractionDigits: 2 })}</span> },
+              ]}
+              data={batches}
+            />
+          )}
+        </div>
+      </ChartCard>
     </div>
   );
 }
