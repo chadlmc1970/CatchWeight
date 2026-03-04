@@ -248,7 +248,7 @@ export default function ForecastingPage() {
                   />
                   <YAxis tick={{ fontSize: 11 }} />
                   <Tooltip
-                    formatter={(value: any, name: string) => [
+                    formatter={(value: any, name: string | undefined) => [
                       value ? `$${value.toFixed(0)}` : null,
                       name === 'historical' ? 'Historical' : 'Forecast'
                     ]}
