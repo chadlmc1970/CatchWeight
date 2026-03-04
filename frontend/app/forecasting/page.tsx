@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import {
-  AreaChart,
-  Area,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -114,17 +114,23 @@ export default function ForecastingPage() {
     (a, b) => a.reliability_score - b.reliability_score
   );
 
+  // Prepare separate historical and forecast data with proper overlap
+  const historicalData = (marginTrend?.historical || []).map(h => ({
+    date: h.date,
+    historical: h.erosion,
+  }));
+
+  const forecastData = (marginTrend?.forecast || []).map(f => ({
+    date: f.date,
+    forecast: f.predicted_erosion,
+  }));
+
+  // Combine with overlap point (last historical = first forecast)
+  const lastHistorical = historicalData[historicalData.length - 1];
   const combinedMarginData = [
-    ...(marginTrend?.historical || []).map(h => ({
-      date: h.date,
-      erosion: h.erosion,
-      type: 'historical' as const,
-    })),
-    ...(marginTrend?.forecast || []).map(f => ({
-      date: f.date,
-      erosion: f.predicted_erosion,
-      type: 'forecast' as const,
-    })),
+    ...historicalData,
+    ...(lastHistorical ? [{ date: lastHistorical.date, forecast: lastHistorical.historical }] : []),
+    ...forecastData,
   ];
 
   const criticalAlerts = reorderAlerts.filter(a => a.alert_level === 'CRITICAL');
@@ -227,7 +233,7 @@ export default function ForecastingPage() {
               infoText="Historical margin erosion (solid line) and projected future trends (dashed line) based on 7-day moving average. Helps finance teams anticipate budget impacts."
             >
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={combinedMarginData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                <LineChart data={combinedMarginData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="date"
@@ -236,17 +242,32 @@ export default function ForecastingPage() {
                   />
                   <YAxis tick={{ fontSize: 11 }} />
                   <Tooltip
-                    formatter={(value: any) => [`$${value.toFixed(0)}`, 'Erosion']}
+                    formatter={(value: any, name: string) => [
+                      value ? `$${value.toFixed(0)}` : null,
+                      name === 'historical' ? 'Historical' : 'Forecast'
+                    ]}
                     labelFormatter={(date) => new Date(date).toLocaleDateString()}
                   />
-                  <Area
+                  {/* Historical line - solid */}
+                  <Line
                     type="monotone"
-                    dataKey="erosion"
+                    dataKey="historical"
                     stroke="#ef4444"
-                    fill="#fca5a5"
                     strokeWidth={2}
+                    dot={false}
+                    connectNulls={false}
                   />
-                </AreaChart>
+                  {/* Forecast line - dashed */}
+                  <Line
+                    type="monotone"
+                    dataKey="forecast"
+                    stroke="#3b82f6"
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    dot={false}
+                    connectNulls={false}
+                  />
+                </LineChart>
               </ResponsiveContainer>
             </ChartCard>
           </GridCell>
