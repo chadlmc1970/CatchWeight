@@ -1,5 +1,6 @@
 'use client';
 
+// Analytics page - margin erosion tracking
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
 import { apiFetch } from '@/lib/api';
