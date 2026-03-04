@@ -374,7 +374,7 @@ export default function ForecastingPage() {
                 <div className="bg-red-50 rounded-lg p-4 border border-red-200">
                   <div className="text-sm text-red-700 mb-1">High-Risk Suppliers</div>
                   <div className="text-2xl font-bold text-red-600">
-                    {sortedByReliability.filter(s => s.reliability_score < 70).length}
+                    {summary?.high_risk_suppliers || 0}
                   </div>
                   <div className="text-xs text-red-600 mt-1">
                     Reliability {'<'} 70%
