@@ -379,7 +379,7 @@ export default function AnalyticsPage() {
                         tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
                       />
                       <Tooltip
-                        formatter={(value: any, name: string) => [
+                        formatter={(value: any, name: string | undefined) => [
                           `$${Math.abs(Number(value)).toLocaleString()}`,
                           name === 'cumulative' ? 'Total Loss' : 'Daily Loss'
                         ]}
