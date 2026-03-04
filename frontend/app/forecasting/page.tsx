@@ -114,23 +114,29 @@ export default function ForecastingPage() {
     (a, b) => a.reliability_score - b.reliability_score
   );
 
-  // Prepare separate historical and forecast data with proper overlap
-  const historicalData = (marginTrend?.historical || []).map(h => ({
-    date: h.date,
-    historical: h.erosion,
-  }));
-
-  const forecastData = (marginTrend?.forecast || []).map(f => ({
-    date: f.date,
-    forecast: f.predicted_erosion,
-  }));
-
-  // Combine with overlap point (last historical = first forecast)
-  const lastHistorical = historicalData[historicalData.length - 1];
+  // Prepare chart data with proper overlap for seamless line transition
   const combinedMarginData = [
-    ...historicalData,
-    ...(lastHistorical ? [{ date: lastHistorical.date, forecast: lastHistorical.historical }] : []),
-    ...forecastData,
+    // Historical data points
+    ...(marginTrend?.historical || []).map((h: any) => ({
+      date: h.date,
+      historical: h.erosion,
+      forecast: null,
+    })),
+    // Overlap point - last historical value shown as first forecast point
+    ...((marginTrend?.historical?.length ?? 0) > 0
+      ? [{
+          date: marginTrend!.historical[marginTrend!.historical.length - 1].date,
+          historical: null,
+          forecast: marginTrend!.historical[marginTrend!.historical.length - 1].erosion,
+        }]
+      : []
+    ),
+    // Forecast data points
+    ...(marginTrend?.forecast || []).map((f: any) => ({
+      date: f.date,
+      historical: null,
+      forecast: f.predicted_erosion,
+    })),
   ];
 
   const criticalAlerts = reorderAlerts.filter(a => a.alert_level === 'CRITICAL');
