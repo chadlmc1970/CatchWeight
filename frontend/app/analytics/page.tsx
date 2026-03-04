@@ -347,61 +347,44 @@ export default function AnalyticsPage() {
                 </ChartCard>
 
                 <ChartCard
-                  title="Margin Erosion by Material"
+                  title="Top Materials by Margin Erosion"
                   height={chartHeight}
-                  infoText="Shows which materials contribute most to total margin loss (absolute $ impact). Top 6 materials with highest erosion displayed."
+                  infoText="Materials ranked by dollar impact on margin loss. Shows actual erosion amounts to help prioritize corrective actions. Negative values represent business costs."
                 >
-                  <div className="h-full flex flex-col">
-                    {/* Pie chart - takes most space */}
-                    <div className="flex-1 min-h-0 pb-2">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={marginDistribution}
-                            cx="50%"
-                            cy="45%"
-                            labelLine={false}
-                            label={false}
-                            outerRadius="65%"
-                            dataKey="value"
-                          >
-                            {marginDistribution.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            formatter={(value: any, name: any, props: any) => {
-                              const total = marginDistribution.reduce((sum, item) => sum + Math.abs(item.value), 0);
-                              const pct = ((Math.abs(value) / total) * 100).toFixed(1);
-                              return [`$${Math.abs(value).toLocaleString()} (${pct}%)`, 'Erosion'];
-                            }}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-
-                    {/* Color-coded legend with percentages */}
-                    <div className="px-4 pb-3 grid grid-cols-2 gap-x-4 gap-y-1.5 flex-shrink-0 border-t border-slate-200 pt-2">
-                      {marginDistribution.map((entry, index) => {
-                        const total = marginDistribution.reduce((sum, item) => sum + Math.abs(item.value), 0);
-                        const percentage = ((Math.abs(entry.value) / total) * 100).toFixed(0);
-                        return (
-                          <div key={`legend-${index}`} className="flex items-center gap-2 min-w-0">
-                            <div
-                              className="w-3 h-3 rounded flex-shrink-0"
-                              style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                            />
-                            <span className="text-xs font-medium text-slate-700 truncate flex-1">
-                              {entry.name}
-                            </span>
-                            <span className="text-xs font-semibold text-slate-900 whitespace-nowrap">
-                              {percentage}%
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={marginDistribution}
+                      layout="vertical"
+                      margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis
+                        type="number"
+                        tick={{ fontSize: 11 }}
+                        tickFormatter={(value) => `$${Math.abs(value).toLocaleString()}`}
+                        label={{ value: 'Margin Erosion ($)', position: 'insideBottom', offset: -5, style: { fontSize: 11, fill: '#64748b' } }}
+                      />
+                      <YAxis
+                        dataKey="name"
+                        type="category"
+                        tick={{ fontSize: 11 }}
+                        width={100}
+                      />
+                      <Tooltip
+                        formatter={(value: any) => {
+                          const absValue = Math.abs(Number(value));
+                          const total = marginDistribution.reduce((sum, item) => sum + Math.abs(item.value), 0);
+                          const pct = ((absValue / total) * 100).toFixed(1);
+                          return [`$${absValue.toLocaleString()} (${pct}%)`, 'Erosion'];
+                        }}
+                      />
+                      <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                        {marginDistribution.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill="#ef4444" />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </ChartCard>
               </div>
 
