@@ -132,11 +132,12 @@ def forecast_margin_trend(forecast_days: int = 30):
             for r in rows
         ]
 
-        # Simple 7-day moving average forecast
+        # Simple moving average forecast (requires at least 3 days of data)
         forecast = []
-        if len(historical) >= 7:
+        min_days = min(7, len(historical))  # Use up to 7 days, or whatever is available
+        if len(historical) >= 3:
             # Calculate recent average
-            recent_erosion_values = [h["erosion"] for h in historical[-7:]]
+            recent_erosion_values = [h["erosion"] for h in historical[-min_days:]]
             recent_avg = sum(recent_erosion_values) / len(recent_erosion_values)
 
             # Calculate standard deviation for confidence band
@@ -153,13 +154,13 @@ def forecast_margin_trend(forecast_days: int = 30):
                     "predicted_erosion": recent_avg,
                     "confidence_lower": max(0, recent_avg - 2 * std_dev),
                     "confidence_upper": recent_avg + 2 * std_dev,
-                    "confidence": "medium"
+                    "confidence": "low" if min_days < 7 else "medium"
                 })
 
         return {
             "historical": historical,
             "forecast": forecast,
-            "forecast_method": "7-day moving average",
+            "forecast_method": f"{min_days}-day moving average" if len(historical) >= 3 else "insufficient data",
             "forecast_days": forecast_days
         }
     except Exception as e:
