@@ -9,6 +9,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
+  ReferenceLine,
 } from 'recharts';
 import { apiFetch } from '@/lib/api';
 import { DashboardGrid, GridCell, ChartCard, CompactKPICard } from '@/components/dashboard';
@@ -234,41 +236,61 @@ export default function ForecastingPage() {
           {/* Margin Erosion Forecast */}
           <GridCell>
             <ChartCard
-              title="Margin Erosion Forecast (30-day)"
+              title="Margin Erosion: Historical & Forecast"
               height={chartHeight}
-              infoText="Historical margin erosion (solid line) and projected future trends (dashed line) based on 7-day moving average. Helps finance teams anticipate budget impacts."
+              infoText="Daily margin impact from weight variance. Historical data (red solid) shows actual losses. Forecast (blue dashed) projects 30-day trend using exponential smoothing with natural volatility. Negative values = cost to business."
             >
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={combinedMarginData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                <LineChart data={combinedMarginData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis
                     dataKey="date"
                     tick={{ fontSize: 11 }}
                     tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   />
-                  <YAxis tick={{ fontSize: 11 }} />
+                  <YAxis
+                    tick={{ fontSize: 11 }}
+                    label={{ value: 'Daily Impact ($)', angle: -90, position: 'insideLeft', style: { fontSize: 11, fill: '#64748b' } }}
+                  />
                   <Tooltip
                     formatter={(value: any, name: string | undefined) => [
-                      value ? `$${value.toFixed(0)}` : null,
-                      name === 'historical' ? 'Historical' : 'Forecast'
+                      value ? `$${value.toFixed(2)}` : null,
+                      name === 'historical' ? 'Actual' : 'Predicted'
                     ]}
-                    labelFormatter={(date) => new Date(date).toLocaleDateString()}
+                    labelFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   />
-                  {/* Historical line - solid */}
+                  <Legend
+                    verticalAlign="top"
+                    height={36}
+                    iconType="line"
+                    formatter={(value: any) => value === 'historical' ? 'Historical (Actual)' : 'Forecast (Predicted)'}
+                  />
+                  {/* Reference line at forecast start */}
+                  {marginTrend?.historical && marginTrend.historical.length > 0 && (
+                    <ReferenceLine
+                      x={marginTrend.historical[marginTrend.historical.length - 1].date}
+                      stroke="#94a3b8"
+                      strokeDasharray="3 3"
+                      label={{ value: 'Today', position: 'top', fontSize: 10, fill: '#64748b' }}
+                    />
+                  )}
+                  {/* Historical line - solid red */}
                   <Line
                     type="monotone"
                     dataKey="historical"
+                    name="historical"
                     stroke="#ef4444"
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     dot={false}
                     connectNulls={false}
                   />
-                  {/* Forecast line - dashed */}
+                  {/* Forecast line - dashed blue */}
                   <Line
                     type="monotone"
                     dataKey="forecast"
+                    name="forecast"
                     stroke="#3b82f6"
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     strokeDasharray="5 5"
                     dot={false}
                     connectNulls={false}
