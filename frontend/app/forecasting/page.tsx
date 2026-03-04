@@ -355,10 +355,10 @@ export default function ForecastingPage() {
           <GridCell>
             <ChartCard
               title="Weight Variance Predictions"
-              height={chartHeight}
+              height="auto"
               infoText="Summary statistics for predicted weight drift ranges across all supplier-material combinations. Shows high-risk suppliers requiring contract renegotiation."
             >
-              <div className="h-full flex flex-col justify-center space-y-3 px-4">
+              <div className="flex flex-col space-y-3 px-4">
                 <div className="bg-slate-50 rounded-lg p-4">
                   <div className="text-sm text-slate-600 mb-1">Total Suppliers Tracked</div>
                   <div className="text-3xl font-bold text-slate-900">
