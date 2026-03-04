@@ -30,6 +30,13 @@ interface MaterialMetric {
   avg_erosion_pct?: number;
 }
 
+interface DailyErosion {
+  date: string;
+  erosion: number;
+  avg_erosion_pct: number;
+  transaction_count: number;
+}
+
 interface WeightDriftRecord {
   material_id: string;
   plant_id: string;
@@ -48,6 +55,7 @@ export default function AnalyticsPage() {
   const [weightDriftByMaterial, setWeightDriftByMaterial] = useState<MaterialMetric[]>([]);
   const [marginErosionByMaterial, setMarginErosionByMaterial] = useState<MaterialMetric[]>([]);
   const [weightDriftRecords, setWeightDriftRecords] = useState<WeightDriftRecord[]>([]);
+  const [marginErosionDaily, setMarginErosionDaily] = useState<DailyErosion[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
 
@@ -55,12 +63,13 @@ export default function AnalyticsPage() {
     async function fetchData() {
       setLoading(true);
       try {
-        const [wdSummary, meSummary, wdByMat, meByMat, wdRecords] = await Promise.all([
+        const [wdSummary, meSummary, wdByMat, meByMat, wdRecords, meDaily] = await Promise.all([
           apiFetch<WeightDriftSummary>('/v1/dataproducts/weight-drift/summary'),
           apiFetch<MarginErosionSummary>('/v1/dataproducts/margin-erosion/summary'),
           apiFetch<MaterialMetric[]>('/v1/dataproducts/weight-drift/by-material'),
           apiFetch<MaterialMetric[]>('/v1/dataproducts/margin-erosion/by-material'),
           apiFetch<WeightDriftRecord[]>('/v1/dataproducts/weight-drift'),
+          apiFetch<DailyErosion[]>('/v1/dataproducts/margin-erosion/daily'),
         ]);
 
         setWeightDriftSummary(wdSummary);
@@ -68,6 +77,7 @@ export default function AnalyticsPage() {
         setWeightDriftByMaterial(wdByMat);
         setMarginErosionByMaterial(meByMat);
         setWeightDriftRecords(wdRecords);
+        setMarginErosionDaily(meDaily);
       } catch (error) {
         console.error('Error fetching analytics data:', error);
       } finally {
@@ -131,11 +141,6 @@ export default function AnalyticsPage() {
     { range: '5-10%', count: weightDriftRecords.filter(r => Math.abs(r.drift_pct) > 5 && Math.abs(r.drift_pct) <= 10).length },
     { range: '>10%', count: weightDriftRecords.filter(r => Math.abs(r.drift_pct) > 10).length },
   ];
-
-  const marginDistribution = marginErosionByMaterial.slice(0, 6).map(m => ({
-    name: m.material_id,
-    value: Math.abs(m.total_erosion || 0)
-  }));
 
   const erosionTrend = chartTrendData.map(d => ({
     date: d.date,
@@ -347,43 +352,47 @@ export default function AnalyticsPage() {
                 </ChartCard>
 
                 <ChartCard
-                  title="Top Materials by Margin Erosion"
+                  title="Cumulative Margin Impact"
                   height={chartHeight}
-                  infoText="Materials ranked by dollar impact on margin loss. Shows actual erosion amounts to help prioritize corrective actions. Negative values represent business costs."
+                  infoText="Running total of margin erosion over time. Shows cumulative financial impact to help measure the scale of losses and track improvement efforts."
                 >
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={marginDistribution}
-                      layout="vertical"
-                      margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
+                    <AreaChart
+                      data={marginErosionDaily.map((item: DailyErosion, index: number, arr: DailyErosion[]) => {
+                        const cumulativeErosion = arr.slice(0, index + 1).reduce((sum: number, d: DailyErosion) => sum + Math.abs(d.erosion), 0);
+                        return {
+                          date: item.date,
+                          cumulative: cumulativeErosion,
+                          daily: Math.abs(item.erosion),
+                        };
+                      })}
+                      margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                       <XAxis
-                        type="number"
+                        dataKey="date"
                         tick={{ fontSize: 11 }}
-                        tickFormatter={(value) => `$${Math.abs(value).toLocaleString()}`}
-                        label={{ value: 'Margin Erosion ($)', position: 'insideBottom', offset: -5, style: { fontSize: 11, fill: '#64748b' } }}
+                        tickFormatter={(date: string) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       />
                       <YAxis
-                        dataKey="name"
-                        type="category"
                         tick={{ fontSize: 11 }}
-                        width={100}
+                        tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
                       />
                       <Tooltip
-                        formatter={(value: any) => {
-                          const absValue = Math.abs(Number(value));
-                          const total = marginDistribution.reduce((sum, item) => sum + Math.abs(item.value), 0);
-                          const pct = ((absValue / total) * 100).toFixed(1);
-                          return [`$${absValue.toLocaleString()} (${pct}%)`, 'Erosion'];
-                        }}
+                        formatter={(value: any, name: string) => [
+                          `$${Math.abs(Number(value)).toLocaleString()}`,
+                          name === 'cumulative' ? 'Total Loss' : 'Daily Loss'
+                        ]}
+                        labelFormatter={(date: string) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       />
-                      <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                        {marginDistribution.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill="#ef4444" />
-                        ))}
-                      </Bar>
-                    </BarChart>
+                      <Area
+                        type="monotone"
+                        dataKey="cumulative"
+                        stroke="#dc2626"
+                        fill="#fca5a5"
+                        strokeWidth={2}
+                      />
+                    </AreaChart>
                   </ResponsiveContainer>
                 </ChartCard>
               </div>

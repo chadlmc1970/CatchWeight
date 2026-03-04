@@ -342,3 +342,37 @@ def get_margin_erosion_by_material():
     except Exception as e:
         logger.error(f"Error fetching margin erosion by material: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/dataproducts/margin-erosion/daily")
+def get_margin_erosion_daily():
+    """Get daily margin erosion trend over time."""
+    try:
+        with get_db() as conn:
+            conn.execute("SET search_path TO sap_poc")
+
+            query = """
+                SELECT
+                    posting_date::text as date,
+                    SUM(margin_erosion_usd) as daily_erosion,
+                    AVG(erosion_pct) as avg_erosion_pct,
+                    COUNT(*) as transaction_count
+                FROM v_margin_erosion
+                GROUP BY posting_date
+                ORDER BY posting_date
+            """
+
+            rows = conn.execute(query).fetchall()
+
+            return [
+                {
+                    "date": row[0],
+                    "erosion": float(row[1] or 0),
+                    "avg_erosion_pct": float(row[2] or 0),
+                    "transaction_count": row[3],
+                }
+                for row in rows
+            ]
+    except Exception as e:
+        logger.error(f"Error fetching daily margin erosion: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
