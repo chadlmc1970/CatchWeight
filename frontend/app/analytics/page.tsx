@@ -347,48 +347,59 @@ export default function AnalyticsPage() {
                 </ChartCard>
 
                 <ChartCard
-                  title="Erosion Distribution"
+                  title="Margin Erosion by Material"
                   height={chartHeight}
-                  infoText="Pie chart showing which materials contribute most to total margin loss. Top 6 materials displayed."
+                  infoText="Shows which materials contribute most to total margin loss (absolute $ impact). Top 6 materials with highest erosion displayed."
                 >
                   <div className="h-full flex flex-col">
-                    <div className="flex-1 min-h-0">
+                    {/* Pie chart - takes most space */}
+                    <div className="flex-1 min-h-0 pb-2">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
                             data={marginDistribution}
                             cx="50%"
-                            cy="50%"
+                            cy="45%"
                             labelLine={false}
                             label={false}
-                            outerRadius={80}
+                            outerRadius="65%"
                             dataKey="value"
                           >
                             {marginDistribution.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
-                          <Tooltip formatter={(value: any) => [`$${value.toLocaleString()}`, 'Erosion']} />
+                          <Tooltip
+                            formatter={(value: any, name: any, props: any) => {
+                              const total = marginDistribution.reduce((sum, item) => sum + Math.abs(item.value), 0);
+                              const pct = ((Math.abs(value) / total) * 100).toFixed(1);
+                              return [`$${Math.abs(value).toLocaleString()} (${pct}%)`, 'Erosion'];
+                            }}
+                          />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
 
-                    {/* Color-coded legend */}
-                    <div className="px-4 pb-2 grid grid-cols-2 gap-2 flex-shrink-0">
-                      {marginDistribution.map((entry, index) => (
-                        <div key={`legend-${index}`} className="flex items-center gap-2">
-                          <div
-                            className="w-4 h-4 rounded flex-shrink-0"
-                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                          />
-                          <span className="text-xs font-medium text-slate-700 truncate">
-                            {entry.name}
-                          </span>
-                          <span className="text-xs text-slate-500 ml-auto whitespace-nowrap">
-                            ${Math.abs(entry.value).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                          </span>
-                        </div>
-                      ))}
+                    {/* Color-coded legend with percentages */}
+                    <div className="px-4 pb-3 grid grid-cols-2 gap-x-4 gap-y-1.5 flex-shrink-0 border-t border-slate-200 pt-2">
+                      {marginDistribution.map((entry, index) => {
+                        const total = marginDistribution.reduce((sum, item) => sum + Math.abs(item.value), 0);
+                        const percentage = ((Math.abs(entry.value) / total) * 100).toFixed(0);
+                        return (
+                          <div key={`legend-${index}`} className="flex items-center gap-2 min-w-0">
+                            <div
+                              className="w-3 h-3 rounded flex-shrink-0"
+                              style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                            />
+                            <span className="text-xs font-medium text-slate-700 truncate flex-1">
+                              {entry.name}
+                            </span>
+                            <span className="text-xs font-semibold text-slate-900 whitespace-nowrap">
+                              {percentage}%
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </ChartCard>
