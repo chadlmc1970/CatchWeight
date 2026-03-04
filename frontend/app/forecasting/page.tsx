@@ -188,7 +188,7 @@ export default function ForecastingPage() {
 
       {/* 2x2 Dashboard Grid */}
       <div className="p-6">
-        <DashboardGrid cols={2} rows={2} gap={4}>
+        <DashboardGrid cols={2} rows={2} gap={3}>
           {/* Supplier Reliability - Top 10 Risk */}
           <GridCell>
             <ChartCard
