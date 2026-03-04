@@ -384,7 +384,7 @@ export default function AnalyticsPage() {
                           `$${Math.abs(Number(value)).toLocaleString()}`,
                           name === 'cumulative' ? 'Total Loss' : 'Daily Loss'
                         ]}
-                        labelFormatter={(date: string) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        labelFormatter={(date: any) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       />
                       <Area
                         type="monotone"
