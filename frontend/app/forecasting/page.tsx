@@ -188,10 +188,10 @@ export default function ForecastingPage() {
                 {sortedByReliability.slice(0, 10).map((supplier, idx) => (
                   <div key={`${supplier.material_id}-${supplier.supplier_code}`} className="flex items-center gap-3">
                     <div className="w-6 text-xs text-slate-500 font-mono">#{idx + 1}</div>
-                    <div className="w-24 text-xs font-medium text-slate-900 truncate">
+                    <div className="min-w-fit text-xs font-medium text-slate-900">
                       {supplier.supplier_code}
                     </div>
-                    <div className="w-20 text-xs text-slate-600 font-mono truncate">
+                    <div className="min-w-fit text-xs text-slate-600 font-mono">
                       {supplier.material_id}
                     </div>
                     <div className="flex-1">
