@@ -190,7 +190,7 @@ export default function ForecastingPage() {
 
       {/* 2x2 Dashboard Grid */}
       <div className="p-6">
-        <DashboardGrid cols={2} rows={2} gap={3}>
+        <DashboardGrid cols={2} rows={2} gap={4}>
           {/* Supplier Reliability - Top 10 Risk */}
           <GridCell>
             <ChartCard
@@ -386,7 +386,7 @@ export default function ForecastingPage() {
               height="auto"
               infoText="Summary statistics for predicted weight drift ranges across all supplier-material combinations. Shows high-risk suppliers requiring contract renegotiation."
             >
-              <div className="flex flex-col space-y-3 px-4">
+              <div className="flex flex-col space-y-3">
                 <div className="bg-slate-50 rounded-lg p-4">
                   <div className="text-sm text-slate-600 mb-1">Total Suppliers Tracked</div>
                   <div className="text-3xl font-bold text-slate-900">
