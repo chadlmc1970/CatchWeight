@@ -51,7 +51,7 @@ export default function DashboardGrid({
     <div
       className={`grid grid-cols-1 md:grid-cols-2 ${colsClass} ${gapClass} ${className}`}
       style={{
-        gridAutoRows: rows ? `minmax(0, 1fr)` : "auto",
+        gridAutoRows: "auto", // Always use auto height to prevent stretching
       }}
     >
       {children}
