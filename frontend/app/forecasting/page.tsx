@@ -304,7 +304,7 @@ export default function ForecastingPage() {
           <GridCell>
             <ChartCard
               title="Inventory Reorder Alerts"
-              height={chartHeight}
+              height="auto"
               infoText="Materials at risk of stockout using consumption-based forecasting. Critical alerts (<7 days) require immediate action to prevent production disruptions."
               actions={
                 <div className="flex gap-2">
@@ -331,7 +331,7 @@ export default function ForecastingPage() {
                 </div>
               }
             >
-              <div className="h-full overflow-y-auto space-y-2 pr-2">
+              <div className="flex flex-col space-y-2 max-h-[400px] overflow-y-auto pr-2">
                 {displayAlerts.length > 0 ? (
                   displayAlerts.map((alert) => (
                     <div
