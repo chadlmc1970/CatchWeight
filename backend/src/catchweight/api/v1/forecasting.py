@@ -207,10 +207,10 @@ def get_forecasting_summary():
                     "total_exposure": 0
                 }
 
-            # Calculate high_risk_suppliers (reliability < 95%) and total_exposure
+            # Calculate high_risk_suppliers (reliability < 70%) and total_exposure
             supplier_stats = conn.execute("""
                 SELECT
-                    COUNT(CASE WHEN reliability_score < 95 THEN 1 END) as high_risk,
+                    COUNT(CASE WHEN reliability_score < 70 THEN 1 END) as high_risk,
                     COALESCE(SUM(total_exposure), 0) as total_exp
                 FROM v_supplier_performance_profile
             """).fetchone()
