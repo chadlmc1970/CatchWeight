@@ -351,38 +351,40 @@ export default function AnalyticsPage() {
                   height={chartHeight}
                   infoText="Pie chart showing which materials contribute most to total margin loss. Top 6 materials displayed."
                 >
-                  <div className="flex flex-col h-full">
-                    <ResponsiveContainer width="100%" height="70%">
-                      <PieChart>
-                        <Pie
-                          data={marginDistribution}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={false}
-                          outerRadius={80}
-                          dataKey="value"
-                        >
-                          {marginDistribution.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip formatter={(value: any) => [`$${value.toLocaleString()}`, 'Erosion']} />
-                      </PieChart>
-                    </ResponsiveContainer>
+                  <div className="h-full flex flex-col">
+                    <div className="flex-1 min-h-0">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={marginDistribution}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={false}
+                            outerRadius={80}
+                            dataKey="value"
+                          >
+                            {marginDistribution.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip formatter={(value: any) => [`$${value.toLocaleString()}`, 'Erosion']} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
 
                     {/* Color-coded legend */}
-                    <div className="px-4 pb-2 grid grid-cols-2 gap-2">
+                    <div className="px-4 pb-2 grid grid-cols-2 gap-2 flex-shrink-0">
                       {marginDistribution.map((entry, index) => (
                         <div key={`legend-${index}`} className="flex items-center gap-2">
                           <div
-                            className="w-4 h-4 rounded"
+                            className="w-4 h-4 rounded flex-shrink-0"
                             style={{ backgroundColor: COLORS[index % COLORS.length] }}
                           />
                           <span className="text-xs font-medium text-slate-700 truncate">
                             {entry.name}
                           </span>
-                          <span className="text-xs text-slate-500 ml-auto">
+                          <span className="text-xs text-slate-500 ml-auto whitespace-nowrap">
                             ${Math.abs(entry.value).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                           </span>
                         </div>
