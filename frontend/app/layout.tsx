@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CatchWeight POC — S4 Inventory & Valuation",
-  description: "SAP S4 Catch-Weight Inventory & Valuation Simulation",
+  title: "Catch Weight Intelligence | AI-Powered SAP S/4HANA Analytics",
+  description: "AI-powered catch-weight material management with predictive analytics, supplier performance scoring, and real-time inventory tracking for SAP S/4HANA",
+  keywords: ["SAP S/4HANA", "Catch Weight", "AI Analytics", "Inventory Management", "Predictive Analytics"],
 };
 
 export default function RootLayout({

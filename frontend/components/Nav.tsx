@@ -48,8 +48,19 @@ export default function Nav() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-slate-900 text-white px-6 py-3 flex items-center gap-6 shadow-lg">
-      <span className="font-bold text-lg tracking-tight mr-4">CatchWeight POC</span>
+    <nav className="sticky top-0 z-50 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white px-6 py-3 flex items-center gap-6 shadow-lg border-b border-slate-700">
+      {/* Brand Logo */}
+      <Link href="/" className="flex items-center gap-3 mr-4 group">
+        <div className="w-9 h-9 bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 rounded-lg flex items-center justify-center text-lg font-bold shadow-lg group-hover:scale-105 transition-transform">
+          ⚖️
+        </div>
+        <div className="flex flex-col">
+          <span className="font-bold text-base tracking-tight leading-none">Catch Weight</span>
+          <span className="text-[10px] text-blue-400 font-semibold tracking-wide">INTELLIGENCE</span>
+        </div>
+      </Link>
+
+      {/* Navigation Links */}
       {links.map((l) => (
         <Link
           key={l.href}
@@ -61,6 +72,8 @@ export default function Nav() {
           {l.label}
         </Link>
       ))}
+
+      {/* Right Side Actions */}
       <div className="ml-auto flex items-center gap-3">
         <Link
           href="/admin"
@@ -78,7 +91,7 @@ export default function Nav() {
         <button
           onClick={handleReloadData}
           disabled={loading}
-          className="text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 px-3 py-1.5 rounded font-medium transition-colors"
+          className="text-xs bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-slate-600 disabled:to-slate-600 px-3 py-1.5 rounded font-medium transition-all shadow-md"
         >
           {loading ? "⏳ Loading..." : "🔄 Reload Data"}
         </button>
