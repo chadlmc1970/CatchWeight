@@ -6,8 +6,9 @@
 Since the database is on Neon and accessible via the DATABASE_URL in render.yaml, you can run migrations directly:
 
 ```bash
-# Export the DATABASE_URL from render.yaml
-export DATABASE_URL="postgresql://neondb_owner:npg_V2ALZjiI5qtr@ep-dark-hill-aiwdm4cf-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+# Export the DATABASE_URL from your environment variables
+# Get this from your Render dashboard or Neon console
+export DATABASE_URL="<your-database-url-here>"
 
 # Run migrations locally against production database
 cd /Users/I870089/CatchWeight
@@ -104,7 +105,9 @@ services:
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
-        value: postgresql://neondb_owner:npg_V2ALZjiI5qtr@ep-dark-hill-aiwdm4cf-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+        fromDatabase:
+          name: neondb
+          property: connectionString
       - key: PYTHON_VERSION
         value: "3.11.0"
 ```
